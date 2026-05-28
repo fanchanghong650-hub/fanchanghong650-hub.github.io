@@ -73,18 +73,78 @@ tags: [标签1, 标签2, 标签3]     # 支持多个标签
 
 使用 Markdown 语法编写（参考本站的另一篇「Markdown 语法参考」）。
 
-### 发布流程
+### 发布流程（完整版）
+
+部署到 GitHub Pages 需要两步操作：**保存源代码** + **部署静态网站**。本仓库使用双分支策略，理解这一点是正确部署的关键。
+
+#### 双分支策略
+
+| 分支 | 内容 | 作用 |
+|------|------|------|
+| `source` | 博客源代码（Markdown、配置、JS、CSS） | 备份源文件，换电脑后可以 `git clone` 继续写 |
+| `main` | 生成的静态网站（HTML/CSS/JS/图片） | 由 GitHub Pages 直接服务，面对读者 |
+
+- `git push origin source` → 将**源代码**推送到 source 分支（备份）
+- `hexo deploy` → 将**生成的网站**推送到 main 分支（上线）
+
+> 两个分支是独立的，分别存放不同的内容。只做其中一个操作，网站不会更新。
+
+#### 完整步骤
+
+**第一步：备份源代码**
 
 ```bash
 cd C:\blog
-hexo clean        # 清除缓存
-hexo generate     # 生成静态文件（可简写为 hexo g）
-hexo deploy       # 部署到 GitHub Pages（可简写为 hexo d）
+git add source/_posts/你的文章文件名.md    # 添加新文章（也可以是整个目录）
+git commit -m "描述你的修改"
+git push -u origin source
 ```
 
-也可以合并为：`hexo clean; hexo generate; hexo deploy`
+> 如果你的 GitHub 默认分支是 `master` 而非 `main`：Hexo 在部署时会自动使用 `.deploy_git` 目录里的 git，只需确保 `_config.yml` 中 `deploy.branch` 设置为你的 Pages 分支名即可。如果不确定，去 GitHub 仓库 Settings → Pages → Branch 查看当前使用的分支名。
+
+**第二步：生成并部署网站**
+
+```bash
+cd C:\blog
+hexo clean        # 清除缓存和之前生成的 public/ 文件夹
+hexo generate     # 重新生成静态文件到 public/（可简写为 hexo g）
+hexo deploy       # 将 public/ 推送到 main 分支（可简写为 hexo d）
+```
+
+也可以合并为一条命令：
+
+```bash
+hexo clean; hexo generate; hexo deploy
+```
 
 > 注意：使用 PowerShell 时必须用分号 `;` 分隔命令，不能用 `&&`。
+
+#### 快捷命令一览
+
+```bash
+# 在 C:\blog 目录下依次执行：
+git add source/_posts/*.md
+git commit -m "发布新文章：XXX"
+git push origin source
+hexo clean; hexo g; hexo d
+```
+
+#### 验证部署是否成功
+
+1. 打开 `https://fanchanghong650-hub.github.io`，检查首页是否出现新文章
+2. 或者直接访问 `https://fanchanghong650-hub.github.io/年/月/日/文章标题/`（例如 `https://fanchanghong650-hub.github.io/2026/05/28/nand-gate-minimization-problem/`）
+3. 如果页面显示 404：等待 1-2 分钟后刷新（GitHub Pages 有短暂缓存），如果仍然 404，检查文章文件名中的中文是否被正确编码
+4. 也可以去 GitHub 仓库的 Actions 标签页查看部署状态
+
+#### 常见错误排查
+
+| 现象 | 可能原因 | 解决方法 |
+|------|---------|---------|
+| 执行 `git push` 报 "Permission denied" | SSH key 未配置或过期 | 使用 `git remote set-url origin https://github.com/你的用户名/仓库名.git` 切换为 HTTPS 方式 |
+| `hexo deploy` 报 "Repository not found" | `_config.yml` 中的 `deploy.repo` 地址有误 | 检查仓库地址是否完全正确，注意用户名大小写 |
+| 部署成功但线上没更新 | 浏览器缓存了旧页面 | 按 Ctrl+Shift+R 强制刷新 |
+| 部署成功但样式错乱 | `hexo clean` 未执行，残留旧缓存 | 先 `hexo clean` 再 `hexo g` |
+| 只执行了 `hexo d` 没推送源码 | 文章上线了，但源代码没备份 | 补执行 `git push origin source` 即可 |
 
 ### 草稿
 
