@@ -108,31 +108,39 @@ hexo publish draft "草稿标题"
 
 所有背景图片存放在 `C:\blog\source\images\bg\`。
 
-当前使用的 5 张背景图片：
+当前使用的 9 张背景图片（定义在 `bg-slideshow.js` 的 `images` 数组中）：
 1. `sakura_ai_wallpaper_pc_01.png`
 2. `屏幕截图 2026-05-05 212232.png`
 3. `屏幕截图 2026-05-10 135332.png`
 4. `屏幕截图 2026-05-23 230354.png`
 5. `屏幕截图 2026-05-26 220923.png`
+6. `屏幕截图 2026-05-05 213723.png`
+7. `屏幕截图 2026-05-05 214857.png`
+8. `屏幕截图 2026-05-17 224053.png`
+9. `屏幕截图 2026-05-23 112138.png`
 
 ### 替换步骤
 
 1. 将新图片放入 `C:\blog\source\images\bg\`
 2. 编辑 `C:\blog\source\js\bg-slideshow.js`
-3. 修改第 2-6 行的图片列表：
+3. 在 `images` 数组中增删条目。例如：
 
 ```javascript
-const bgImages = [
+var images = [
   '/images/bg/你的新图片1.png',
   '/images/bg/你的新图片2.png',
   '/images/bg/你的新图片3.png',
-  '/images/bg/你的新图片4.png',
-  '/images/bg/你的新图片5.png',
 ];
 ```
 
-4. 如果要调整切换间隔，修改 `bgInterval` 的值（单位毫秒，默认 8000 = 8秒）
-5. 重新部署：`hexo clean; hexo generate; hexo deploy`
+> **注意**：文件名含中文时，需要用 `encodeURIComponent()` 包裹文件名部分，否则浏览器可能无法加载。格式为：
+> ```javascript
+> '/images/bg/' + encodeURIComponent('中文文件名.png')
+> ```
+
+4. 图片数量没有限制，轮播脚本会自动适应
+5. 如果要调整切换间隔，修改 `bgInterval` 的值（单位毫秒，当前 3500 = 3.5秒）
+6. 重新部署：`hexo clean; hexo generate; hexo deploy`
 
 ### 添加更多或更少背景图
 
