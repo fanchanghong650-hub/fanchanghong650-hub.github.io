@@ -337,15 +337,20 @@ hexo server --draft    # 预览草稿
 cd C:\blog
 git add -A
 git commit -m "描述你的修改"
-git push -u origin main
+git push -u origin source
 hexo clean; hexo generate; hexo deploy
 ```
 
 ### 部署原理
 
-1. `git push` 将源代码推送到 GitHub 仓库的 main 分支（备份源码）
-2. `hexo deploy` 将生成的静态网站推送到同一仓库的 main 分支（GitHub Pages 读取这个分支）
-3. 网站地址：`https://fanchanghong650-hub.github.io`
+本仓库使用双分支策略：
+
+1. `source` 分支 — 存放博客源代码（Markdown、配置、JS、CSS）
+2. `main` 分支 — 存放生成的静态网站（HTML/CSS/JS/图片），由 GitHub Pages 直接服务
+
+- `git push origin source` 将源代码备份到 source 分支
+- `hexo deploy` 将生成的静态网站部署到 main 分支
+- 网站地址：`https://fanchanghong650-hub.github.io`
 
 ### 线上与本地同步
 
