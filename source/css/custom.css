@@ -1,0 +1,250 @@
+/* ========== 桜ノ詩の庭 — Sakura no Uta Theme ========== */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;700&display=swap');
+
+body {
+  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 0.03em;
+}
+h1, h2, h3, h4, h5, h6,
+.article-title, #site-title, #article-container {
+  font-family: 'Noto Serif SC', 'Noto Sans SC', serif;
+}
+
+:root {
+  --sakura-pink: #F2A7B5;
+  --sakura-dark: #E88A9A;
+  --sakura-light: #FADADD;
+  --panel-transparent: rgba(255, 255, 255, 0.22);
+  --panel-solid: rgba(255, 250, 251, 0.93);
+}
+
+/* ===== HOME PAGE — full-screen header only, no content ===== */
+body.page-home #content-inner { display: none !important; }
+body.page-home #footer { display: none !important; }
+body.page-home .layout {
+  justify-content: center;
+  max-width: 100% !important;
+}
+body.page-home #page-header {
+  height: 100vh !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+body.page-home #site-title,
+body.page-home #site-subtitle {
+  color: #fff !important;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5), 0 0 40px rgba(242,167,181,0.3);
+  font-size: 2.5rem;
+}
+body.page-home {
+  background: linear-gradient(170deg, #FDE0E8 0%, #FAD1DB 25%, #F8C4D0 50%, #E8B8C8 75%, #FDE0E8 100%) !important;
+  min-height: 100vh;
+}
+
+/* ===== NAV — transparent on all pages ===== */
+#nav {
+  background: rgba(255,245,245,0.55) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(242,167,181,0.15);
+}
+[data-theme="dark"] #nav { background: rgba(30,14,14,0.7) !important; }
+
+/* ===== ARCHIVE + CATEGORY + TAG + POST: hide default bg ===== */
+body.page-archive #web_bg,
+body.page-post #web_bg,
+body.page-category #web_bg,
+body.page-tag #web_bg {
+  background: transparent !important;
+}
+
+/* ===== SHRINK page-header on non-home pages ===== */
+body.page-archive #page-header,
+body.page-category #page-header,
+body.page-tag #page-header {
+  background: transparent !important;
+  height: auto !important;
+  min-height: unset !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+/* Move page labels (Archives, 文章分类, 标签) to bottom of page */
+/* Hide page labels (Archives, 文章分类, 标签) */
+body.page-archive #page-site-info,
+body.page-category #page-site-info,
+body.page-tag #page-site-info {
+  display: none !important;
+}
+
+/* ===== CONTENT PANEL — transparent, click to solidify (archive) ===== */
+body.page-archive #archive,
+body.page-post #article-container,
+body.page-category #page,
+body.page-tag #page {
+  background: var(--panel-transparent) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 10px !important;
+  border: 1px solid rgba(255,255,255,0.25) !important;
+  transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer;
+  position: relative;
+  padding: 20px 24px !important;
+}
+
+/* Solid state */
+body.page-archive #archive.solid,
+body.page-post #article-container.solid,
+body.page-category #page.solid,
+body.page-tag #page.solid {
+  background: var(--panel-solid) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(242,167,181,0.35) !important;
+  box-shadow: 0 4px 24px rgba(232,138,154,0.25) !important;
+  cursor: default;
+}
+
+/* Click hint */
+body.page-archive #archive::after,
+body.page-post #article-container::after,
+body.page-category #page::after,
+body.page-tag #page::after {
+  content: '\2726 点击面板以聚焦阅读 \2726';
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 11px;
+  color: rgba(200,150,160,0.55);
+  pointer-events: none;
+  font-family: 'Noto Serif SC', serif;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+body.page-archive #archive.solid::after,
+body.page-post #article-container.solid::after,
+body.page-category #page.solid::after,
+body.page-tag #page.solid::after {
+  opacity: 0;
+}
+
+/* ===== SIDEBAR CARDS — transparent ===== */
+body.page-archive #aside-content .card-widget,
+body.page-post #aside-content .card-widget,
+body.page-category #aside-content .card-widget,
+body.page-tag #aside-content .card-widget {
+  background: var(--panel-transparent) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 8px !important;
+  border: 1px solid rgba(255,255,255,0.25) !important;
+  transition: all 0.4s ease !important;
+  cursor: pointer;
+}
+body.page-archive #aside-content .card-widget.solid,
+body.page-post #aside-content .card-widget.solid,
+body.page-category #aside-content .card-widget.solid,
+body.page-tag #aside-content .card-widget.solid {
+  background: var(--panel-solid) !important;
+}
+
+/* ===== DARK MODE ===== */
+[data-theme="dark"] body.page-archive #archive,
+[data-theme="dark"] body.page-post #article-container,
+[data-theme="dark"] body.page-category #page,
+[data-theme="dark"] body.page-tag #page {
+  background: rgba(30,14,14,0.32) !important;
+  border: 1px solid rgba(242,167,181,0.12) !important;
+}
+[data-theme="dark"] body.page-archive #archive.solid,
+[data-theme="dark"] body.page-post #article-container.solid,
+[data-theme="dark"] body.page-category #page.solid,
+[data-theme="dark"] body.page-tag #page.solid {
+  background: rgba(35,16,16,0.95) !important;
+}
+[data-theme="dark"] body.page-archive #aside-content .card-widget,
+[data-theme="dark"] body.page-post #aside-content .card-widget,
+[data-theme="dark"] body.page-category #aside-content .card-widget,
+[data-theme="dark"] body.page-tag #aside-content .card-widget {
+  background: rgba(30,14,14,0.32) !important;
+}
+[data-theme="dark"] body.page-archive #aside-content .card-widget.solid,
+[data-theme="dark"] body.page-post #aside-content .card-widget.solid,
+[data-theme="dark"] body.page-category #aside-content .card-widget.solid,
+[data-theme="dark"] body.page-tag #aside-content .card-widget.solid {
+  background: rgba(35,16,16,0.92) !important;
+}
+
+/* ===== ARTICLE TITLE ===== */
+body.page-post .article-title {
+  text-shadow: 0 1px 8px rgba(255,255,255,0.6);
+}
+
+/* ===== TAGS ===== */
+.tag-cloud-list a, .card-tag-cloud a {
+  color: #E88A9A !important;
+  border: 1px solid rgba(242,167,181,0.3) !important;
+  border-radius: 14px !important;
+  padding: 4px 12px !important;
+}
+.tag-cloud-list a:hover, .card-tag-cloud a:hover {
+  background: #F2A7B5 !important;
+  color: #fff !important;
+}
+a.article-title { color: #D47888 !important; }
+[data-theme="dark"] a.article-title { color: #F2A7B5 !important; }
+
+blockquote {
+  border-left: 4px solid #F2A7B5 !important;
+  background: rgba(255,240,243,0.5) !important;
+  border-radius: 0 6px 6px 0;
+}
+
+div.highlight, figure.highlight {
+  border-radius: 6px !important;
+  border: 1px solid rgba(242,167,181,0.15);
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #F2A7B5; border-radius: 3px; }
+
+/* Footer — hidden on home, transparent elsewhere */
+body.page-home #footer { display: none !important; }
+body:not(.page-home) #footer {
+  background: rgba(255,245,245,0.5) !important;
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(242,167,181,0.15);
+  color: #C4959D !important;
+}
+[data-theme="dark"] body:not(.page-home) #footer {
+  background: rgba(30,14,14,0.6) !important;
+}
+
+#pagination .page-number.current {
+  background: #F2A7B5 !important;
+  border-color: #F2A7B5 !important;
+}
+
+::selection { background: #FADADD !important; color: #5D3A3A !important; }
+
+#toc .toc-link.active {
+  color: #E88A9A !important;
+  border-left-color: #F2A7B5 !important;
+}
+
+/* Miku glow */
+#live2dcanvas {
+  animation: miku-glow 4s ease-in-out infinite;
+}
+@keyframes miku-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(242,167,181,0.3)); }
+  50% { filter: drop-shadow(0 0 12px rgba(242,167,181,0.5)); }
+}
+
+#nav .menus_items .menus_item a { color: #C4959D !important; }
+#nav .menus_items .menus_item a:hover { color: #E88A9A !important; }
