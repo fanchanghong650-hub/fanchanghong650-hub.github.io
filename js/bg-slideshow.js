@@ -14,7 +14,7 @@
   if (!isPost && !isArchive && !isCategory && !isTag) return;
 
   var bgIndex = 0;
-  var bgInterval = 8000; // 8 seconds per image
+  var bgInterval = 3500; // ms per image
 
   var images = [
     '/images/bg/sakura_ai_wallpaper_pc_01.png',
@@ -22,6 +22,10 @@
     '/images/bg/' + encodeURIComponent('屏幕截图 2026-05-10 135332.png'),
     '/images/bg/' + encodeURIComponent('屏幕截图 2026-05-23 230354.png'),
     '/images/bg/' + encodeURIComponent('屏幕截图 2026-05-26 220923.png'),
+    '/images/bg/' + encodeURIComponent('屏幕截图 2026-05-05 213723.png'),
+    '/images/bg/' + encodeURIComponent('屏幕截图 2026-05-05 214857.png'),
+    '/images/bg/' + encodeURIComponent('屏幕截图 2026-05-17 224053.png'),
+    '/images/bg/' + encodeURIComponent('屏幕截图 2026-05-23 112138.png'),
   ];
 
   // Preload images
