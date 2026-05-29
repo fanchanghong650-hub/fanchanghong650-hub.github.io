@@ -1,0 +1,605 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材 | 桜ノ詩の庭</title><meta name="author" content="Fam_RiverBird"><meta name="copyright" content="Fam_RiverBird"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#FFF5F5"><meta name="description" content="为什么这本书值得关注如果你学过电路分析，大概率遇到过这种情况：手算节点电压时，两个方程消元还算清爽，三个方程就开始出现分数灾难，四个方程直接放弃。然后你打开 SPICE 仿真，一切交给计算机。 但有没有一种方法，既适合手算，又能自然过渡到计算机求解？ Jiri Vlach 的 Linear Circuit Theory: Matrices in Computer Applications（2014">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材">
+<meta property="og:url" content="https://fanchanghong650-hub.github.io/2026/05/29/linear-circuit-theory-matrix-method/index.html">
+<meta property="og:site_name" content="桜ノ詩の庭">
+<meta property="og:description" content="为什么这本书值得关注如果你学过电路分析，大概率遇到过这种情况：手算节点电压时，两个方程消元还算清爽，三个方程就开始出现分数灾难，四个方程直接放弃。然后你打开 SPICE 仿真，一切交给计算机。 但有没有一种方法，既适合手算，又能自然过渡到计算机求解？ Jiri Vlach 的 Linear Circuit Theory: Matrices in Computer Applications（2014">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://fanchanghong650-hub.github.io/img/butterfly-icon.png">
+<meta property="article:published_time" content="2026-05-29T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-29T12:43:35.293Z">
+<meta property="article:author" content="Fam_RiverBird">
+<meta property="article:tag" content="拉普拉斯变换">
+<meta property="article:tag" content="灵敏度分析">
+<meta property="article:tag" content="电路分析">
+<meta property="article:tag" content="矩阵代数">
+<meta property="article:tag" content="线性电路">
+<meta property="article:tag" content="节点分析">
+<meta property="article:tag" content="计算机辅助设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fanchanghong650-hub.github.io/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材",
+  "url": "https://fanchanghong650-hub.github.io/2026/05/29/linear-circuit-theory-matrix-method/",
+  "image": "https://fanchanghong650-hub.github.io/img/butterfly-icon.png",
+  "datePublished": "2026-05-29T12:00:00.000Z",
+  "dateModified": "2026-05-29T12:43:35.293Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Fam_RiverBird",
+      "url": "https://fanchanghong650-hub.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://fanchanghong650-hub.github.io/2026/05/29/linear-circuit-theory-matrix-method/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#2D1818')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#FFF5F5')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><script src="/js/body-class.js"></script><meta name="generator" content="Hexo 8.1.2"><style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">82</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">桜ノ詩の庭</span></a><a class="nav-page-title" href="/"><span class="site-name">《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-29T12:00:00.000Z" title="发表于 2026-05-29 20:00:00">2026-05-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-29T12:43:35.293Z" title="更新于 2026-05-29 20:43:35">2026-05-29</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%94%B5%E5%AD%90%E5%B7%A5%E7%A8%8B/">电子工程</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%94%B5%E5%AD%90%E5%B7%A5%E7%A8%8B/%E7%94%B5%E8%B7%AF%E7%90%86%E8%AE%BA/">电路理论</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="为什么这本书值得关注"><a href="#为什么这本书值得关注" class="headerlink" title="为什么这本书值得关注"></a>为什么这本书值得关注</h2><p>如果你学过电路分析，大概率遇到过这种情况：手算节点电压时，两个方程消元还算清爽，三个方程就开始出现分数灾难，四个方程直接放弃。然后你打开 SPICE 仿真，一切交给计算机。</p>
+<p><strong>但有没有一种方法，既适合手算，又能自然过渡到计算机求解？</strong></p>
+<p>Jiri Vlach 的 <em>Linear Circuit Theory: Matrices in Computer Applications</em>（2014, CRC Press）给出的答案是：<strong>从一开始就用矩阵</strong>。</p>
+<p>这本书的副标题 <em>Matrices in Computer Applications</em> 点明了它的核心哲学——矩阵代数不是”高级话题”，而是应该从第三章就引入的基础工具。全书 463 页，18 章，覆盖了线性电路理论的几乎所有主题，从欧姆定律一直讲到改进节点法（MNF）和傅里叶变换。</p>
+<hr>
+<h2 id="作者背景"><a href="#作者背景" class="headerlink" title="作者背景"></a>作者背景</h2><p><strong>Jiri Vlach</strong> 是加拿大滑铁卢大学电气与计算机工程系的 Distinguished Professor Emeritus，IEEE Life Fellow。他与 Kishore Singhal 合著了 <em>Computer Methods for Circuit Analysis and Design</em>（1994），是电路仿真领域的标准参考书。这本 <em>Linear Circuit Theory</em> 可以看作那本进阶著作的本科前置教材。</p>
+<p>Vlach 的教学哲学贯穿全书：</p>
+<blockquote>
+<p>“Emphasis of the book is on solving small examples by hand, because only practice leads to understanding and knowledge.”</p>
+</blockquote>
+<p>他坚持让学生<strong>亲手算</strong>——但用更聪明的方法算。</p>
+<hr>
+<h2 id="全书结构：从基础元件到计算机算法"><a href="#全书结构：从基础元件到计算机算法" class="headerlink" title="全书结构：从基础元件到计算机算法"></a>全书结构：从基础元件到计算机算法</h2><p>全书 18 章的架构可以划分为六个模块，每个模块建立在前一个的基础上，形成一条清晰的递进路线。</p>
+<h3 id="模块一：基础（第-1–2-章）⭐⭐⭐⭐⭐-必读"><a href="#模块一：基础（第-1–2-章）⭐⭐⭐⭐⭐-必读" class="headerlink" title="模块一：基础（第 1–2 章）⭐⭐⭐⭐⭐ 必读"></a>模块一：基础（第 1–2 章）⭐⭐⭐⭐⭐ 必读</h3><table>
+<thead>
+<tr>
+<th>章节</th>
+<th>内容</th>
+<th>重要性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Ch 1: Basic Concepts</strong></td>
+<td>电压/电流、无源元件（RLC）、受控源、运算放大器、欧姆定律、基尔霍夫定律、分压/分流</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 2: Nodal and Mesh Analysis</strong></td>
+<td>节点分析法（KCL）、网孔分析法（KVL）、方程组建立</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<p><strong>第 1 章</strong>是电路理论的”语言课”——定义变量、元件和基本定律。值得注意的是，Vlach 从一开始就区分<strong>独立源的符号</strong>（<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.729ex" height="1.538ex" role="img" focusable="false" viewBox="0 -680 764 680"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D438" d="M492 213Q472 213 472 226Q472 230 477 250T482 285Q482 316 461 323T364 330H312Q311 328 277 192T243 52Q243 48 254 48T334 46Q428 46 458 48T518 61Q567 77 599 117T670 248Q680 270 683 272Q690 274 698 274Q718 274 718 261Q613 7 608 2Q605 0 322 0H133Q31 0 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H757Q764 676 764 669Q764 664 751 557T737 447Q735 440 717 440H705Q698 445 698 453L701 476Q704 500 704 528Q704 558 697 578T678 609T643 625T596 632T532 634H485Q397 633 392 631Q388 629 386 622Q385 619 355 499T324 377Q347 376 372 376H398Q464 376 489 391T534 472Q538 488 540 490T557 493Q562 493 565 493T570 492T572 491T574 487T577 483L544 351Q511 218 508 216Q505 213 492 213Z"></path></g></g></g></svg></mjx-container> 和 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="1.432ex" height="1.595ex" role="img" focusable="false" viewBox="0 -683 633 705"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43D" d="M447 625Q447 637 354 637H329Q323 642 323 645T325 664Q329 677 335 683H352Q393 681 498 681Q541 681 568 681T605 682T619 682Q633 682 633 672Q633 670 630 658Q626 642 623 640T604 637Q552 637 545 623Q541 610 483 376Q420 128 419 127Q397 64 333 21T195 -22Q137 -22 97 8T57 88Q57 130 80 152T132 174Q177 174 182 130Q182 98 164 80T123 56Q115 54 115 53T122 44Q148 15 197 15Q235 15 271 47T324 130Q328 142 387 380T447 625Z"></path></g></g></g></svg></mjx-container>）与<strong>电路变量</strong>（<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="1.74ex" height="1.595ex" role="img" focusable="false" viewBox="0 -683 769 705"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D449" d="M52 648Q52 670 65 683H76Q118 680 181 680Q299 680 320 683H330Q336 677 336 674T334 656Q329 641 325 637H304Q282 635 274 635Q245 630 242 620Q242 618 271 369T301 118L374 235Q447 352 520 471T595 594Q599 601 599 609Q599 633 555 637Q537 637 537 648Q537 649 539 661Q542 675 545 679T558 683Q560 683 570 683T604 682T668 681Q737 681 755 683H762Q769 676 769 672Q769 655 760 640Q757 637 743 637Q730 636 719 635T698 630T682 623T670 615T660 608T652 599T645 592L452 282Q272 -9 266 -16Q263 -18 259 -21L241 -22H234Q216 -22 216 -15Q213 -9 177 305Q139 623 138 626Q133 637 76 637H59Q52 642 52 648Z"></path></g></g></g></svg></mjx-container> 和 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.14ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 504 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43C" d="M43 1Q26 1 26 10Q26 12 29 24Q34 43 39 45Q42 46 54 46H60Q120 46 136 53Q137 53 138 54Q143 56 149 77T198 273Q210 318 216 344Q286 624 286 626Q284 630 284 631Q274 637 213 637H193Q184 643 189 662Q193 677 195 680T209 683H213Q285 681 359 681Q481 681 487 683H497Q504 676 504 672T501 655T494 639Q491 637 471 637Q440 637 407 634Q393 631 388 623Q381 609 337 432Q326 385 315 341Q245 65 245 59Q245 52 255 50T307 46H339Q345 38 345 37T342 19Q338 6 332 0H316Q279 2 179 2Q143 2 113 2T65 2T43 1Z"></path></g></g></g></svg></mjx-container>），这个细节在建立方程时能减少混淆。</p>
+<p><strong>第 2 章</strong>引入了节点分析和网孔分析两种方法。Vlach 虽然给予两者大致同等的篇幅，但明确指出：<strong>网孔分析有严重局限，节点分析才是现代电路仿真的基础。</strong> 所有主流电路仿真软件（SPICE 等）都基于节点分析的扩展——改进节点法（MNF，第 17 章）。</p>
+<h3 id="模块二：矩阵方法与受控源（第-3–5-章）⭐⭐⭐⭐⭐-本书核心"><a href="#模块二：矩阵方法与受控源（第-3–5-章）⭐⭐⭐⭐⭐-本书核心" class="headerlink" title="模块二：矩阵方法与受控源（第 3–5 章）⭐⭐⭐⭐⭐ 本书核心"></a>模块二：矩阵方法与受控源（第 3–5 章）⭐⭐⭐⭐⭐ 本书核心</h3><table>
+<thead>
+<tr>
+<th>章节</th>
+<th>内容</th>
+<th>重要性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Ch 3: Matrix Methods</strong></td>
+<td>方程组写成矩阵形式、行列式、Cramer 法则、矩阵求逆、电阻网络求解</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 4: Dependent Sources</strong></td>
+<td>四种受控源（VCCS、CCVS、CCCS、VCVS）的矩阵处理</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 5: Network Transformations</strong></td>
+<td>源变换、叠加原理、戴维南/诺顿定理、输入/输出阻抗、运放电路</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<p><strong>第 3 章是全书的方法论基石。</strong> Vlach 假设大一学生完全没学过矩阵代数，从零开始讲解：如何将两三个方程写成矩阵形式、计算行列式、应用 Cramer 法则。他能在<strong>一节课内</strong>讲完这些基础知识。</p>
+<p>为什么是 Cramer 法则而不是消元法？</p>
+<ol>
+<li><strong>避免分数</strong>：消元法在符号推导时会制造大量分数，而 Cramer 法则延迟除法到最后一步。</li>
+<li><strong>适合符号分析</strong>：当元件值保留为字母（非数值）时，Cramer 法则的处理过程”reasonably simple”。</li>
+<li><strong>自然过渡到计算机</strong>：矩阵形式是任何数值求解器的输入格式。</li>
+</ol>
+<p><strong>第 4 章</strong>将第 3 章的矩阵方法扩展到包含受控源的网络。Vlach 逐一处理四种受控源，展示每种情况下系统矩阵的修改方式——这是在为第 17 章的 MNF 打基础。</p>
+<p><strong>第 5 章</strong>汇集了电路理论中最实用的几个定理：源变换、叠加原理、戴维南和诺顿等效。这一章的推荐部分（§5.8 Recommendations）值得单独阅读——它总结了什么情况下该用哪种方法。</p>
+<h3 id="模块三：动态元件与频域（第-6–8-章）⭐⭐⭐⭐"><a href="#模块三：动态元件与频域（第-6–8-章）⭐⭐⭐⭐" class="headerlink" title="模块三：动态元件与频域（第 6–8 章）⭐⭐⭐⭐"></a>模块三：动态元件与频域（第 6–8 章）⭐⭐⭐⭐</h3><table>
+<thead>
+<tr>
+<th>章节</th>
+<th>内容</th>
+<th>重要性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Ch 6: Capacitors and Inductors</strong></td>
+<td>电容/电感的物理特性与串并联</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 7: Networks with C and L</strong></td>
+<td>阻抗与导纳（引入 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.023ex;" xmlns="http://www.w3.org/2000/svg" width="1.061ex" height="1.023ex" role="img" focusable="false" viewBox="0 -442 469 452"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g></g></g></svg></mjx-container> 变量）、含储能元件的网络分析</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 8: Frequency Domain</strong></td>
+<td>正弦信号与相量、频域分析、RC/RL/RLC 网络的频率响应</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<p><strong>第 7 章</strong>有一个值得注意的教学选择：Vlach 没有走”先微分方程、再拉普拉斯变换”的传统路线，而是<strong>直接引入 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.023ex;" xmlns="http://www.w3.org/2000/svg" width="1.061ex" height="1.023ex" role="img" focusable="false" viewBox="0 -442 469 452"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g></g></g></svg></mjx-container> 变量</strong>，用电容阻抗 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.043ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2229 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(500,0)"><g data-mml-node="mo"><path data-c="2F" d="M423 750Q432 750 438 744T444 730Q444 725 271 248T92 -240Q85 -250 75 -250Q68 -250 62 -245T56 -231Q56 -221 230 257T407 740Q411 750 423 750Z"></path></g></g><g data-mml-node="mi" transform="translate(1000,0)"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g><g data-mml-node="mi" transform="translate(1469,0)"><path data-c="1D436" d="M50 252Q50 367 117 473T286 641T490 704Q580 704 633 653Q642 643 648 636T656 626L657 623Q660 623 684 649Q691 655 699 663T715 679T725 690L740 705H746Q760 705 760 698Q760 694 728 561Q692 422 692 421Q690 416 687 415T669 413H653Q647 419 647 422Q647 423 648 429T650 449T651 481Q651 552 619 605T510 659Q484 659 454 652T382 628T299 572T226 479Q194 422 175 346T156 222Q156 108 232 58Q280 24 350 24Q441 24 512 92T606 240Q610 253 612 255T628 257Q648 257 648 248Q648 243 647 239Q618 132 523 55T319 -22Q206 -22 128 53T50 252Z"></path></g></g></g></svg></mjx-container> 和电感阻抗 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.023ex;" xmlns="http://www.w3.org/2000/svg" width="2.602ex" height="1.568ex" role="img" focusable="false" viewBox="0 -683 1150 693"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g><g data-mml-node="mi" transform="translate(469,0)"><path data-c="1D43F" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 217 683Q271 680 344 680Q485 680 506 683H518Q524 677 524 674T522 656Q517 641 513 637H475Q406 636 394 628Q387 624 380 600T313 336Q297 271 279 198T252 88L243 52Q243 48 252 48T311 46H328Q360 46 379 47T428 54T478 72T522 106T564 161Q580 191 594 228T611 270Q616 273 628 273H641Q647 264 647 262T627 203T583 83T557 9Q555 4 553 3T537 0T494 -1Q483 -1 418 -1T294 0H116Q32 0 32 10Q32 17 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path></g></g></g></svg></mjx-container> 来处理动态元件。这种处理方式让频域分析（<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.462ex;" xmlns="http://www.w3.org/2000/svg" width="6.92ex" height="1.957ex" role="img" focusable="false" viewBox="0 -661 3058.6 865"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g><g data-mml-node="mo" transform="translate(746.8,0)"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g><g data-mml-node="mi" transform="translate(2024.6,0)"><path data-c="1D457" d="M297 596Q297 627 318 644T361 661Q378 661 389 651T403 623Q403 595 384 576T340 557Q322 557 310 567T297 596ZM288 376Q288 405 262 405Q240 405 220 393T185 362T161 325T144 293L137 279Q135 278 121 278H107Q101 284 101 286T105 299Q126 348 164 391T252 441Q253 441 260 441T272 442Q296 441 316 432Q341 418 354 401T367 348V332L318 133Q267 -67 264 -75Q246 -125 194 -164T75 -204Q25 -204 7 -183T-12 -137Q-12 -110 7 -91T53 -71Q70 -71 82 -81T95 -112Q95 -148 63 -167Q69 -168 77 -168Q111 -168 139 -140T182 -74L193 -32Q204 11 219 72T251 197T278 308T289 365Q289 372 288 376Z"></path></g><g data-mml-node="mi" transform="translate(2436.6,0)"><path data-c="1D714" d="M495 384Q495 406 514 424T555 443Q574 443 589 425T604 364Q604 334 592 278T555 155T483 38T377 -11Q297 -11 267 66Q266 68 260 61Q201 -11 125 -11Q15 -11 15 139Q15 230 56 325T123 434Q135 441 147 436Q160 429 160 418Q160 406 140 379T94 306T62 208Q61 202 61 187Q61 124 85 100T143 76Q201 76 245 129L253 137V156Q258 297 317 297Q348 297 348 261Q348 243 338 213T318 158L308 135Q309 133 310 129T318 115T334 97T358 83T393 76Q456 76 501 148T546 274Q546 305 533 325T508 357T495 384Z"></path></g></g></g></svg></mjx-container>，第 8 章）和拉普拉斯变换（第 9 章）之间的过渡非常自然。</p>
+<p><strong>第 8 章</strong>的频域分析将第 7 章的方法应用于正弦稳态。RC、RL、RLC 网络的频率响应被系统地分类讨论，为后续的滤波器设计奠定基础。</p>
+<h3 id="模块四：拉普拉斯变换与时域分析（第-9–10-章）⭐⭐⭐⭐⭐"><a href="#模块四：拉普拉斯变换与时域分析（第-9–10-章）⭐⭐⭐⭐⭐" class="headerlink" title="模块四：拉普拉斯变换与时域分析（第 9–10 章）⭐⭐⭐⭐⭐"></a>模块四：拉普拉斯变换与时域分析（第 9–10 章）⭐⭐⭐⭐⭐</h3><table>
+<thead>
+<tr>
+<th>章节</th>
+<th>内容</th>
+<th>重要性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Ch 9: Laplace Transformation</strong></td>
+<td>拉普拉斯变换定义、有理函数分解（单极点/多极点）、微分/积分/时移性质、信号与网络</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 10: Time Domain</strong></td>
+<td>含初始条件的电容/电感网络时域响应、RLC 电路时域分析</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<p><strong>第 9 章</strong>对多极点的处理（§9.4）被 Vlach 标注为可选——因为在实际设计中，含多极点的网络总是劣于单极点网络。这是一个体现了作者工程判断力的细节。</p>
+<p><strong>第 10 章</strong>使用拉普拉斯反变换求解时域响应，特别注意初始条件的处理。Vlach 区分了”无初始条件”和”有初始条件”两种情况——后者在瞬态分析中至关重要。</p>
+<h3 id="模块五：网络函数、有源网络与双端口（第-11–14-章）⭐⭐⭐⭐"><a href="#模块五：网络函数、有源网络与双端口（第-11–14-章）⭐⭐⭐⭐" class="headerlink" title="模块五：网络函数、有源网络与双端口（第 11–14 章）⭐⭐⭐⭐"></a>模块五：网络函数、有源网络与双端口（第 11–14 章）⭐⭐⭐⭐</h3><table>
+<thead>
+<tr>
+<th>章节</th>
+<th>内容</th>
+<th>重要性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Ch 11: Network Functions</strong></td>
+<td>网络函数定义、极点/零点与稳定性、从零极点获取频率响应</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 12: Active Networks</strong></td>
+<td>理想/非理想运放、有限增益放大器、RC 有源网络设计（Sallen-Key 等）</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 13: Two-Ports</strong></td>
+<td>双端口网络的 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.636ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 723 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D44D" d="M58 8Q58 23 64 35Q64 36 329 334T596 635L586 637Q575 637 512 637H500H476Q442 637 420 635T365 624T311 598T266 548T228 469Q227 466 226 463T224 458T223 453T222 450L221 448Q218 443 202 443Q185 443 182 453L214 561Q228 606 241 651Q249 679 253 681Q256 683 487 683H718Q723 678 723 675Q723 673 717 649Q189 54 188 52L185 49H274Q369 50 377 51Q452 60 500 100T579 247Q587 272 590 277T603 282H607Q628 282 628 271Q547 5 541 2Q538 0 300 0H124Q58 0 58 8Z"></path></g></g></g></svg></mjx-container>/<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.726ex" height="1.545ex" role="img" focusable="false" viewBox="0 -683 763 683"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D44C" d="M66 637Q54 637 49 637T39 638T32 641T30 647T33 664T42 682Q44 683 56 683Q104 680 165 680Q288 680 306 683H316Q322 677 322 674T320 656Q316 643 310 637H298Q242 637 242 624Q242 619 292 477T343 333L346 336Q350 340 358 349T379 373T411 410T454 461Q546 568 561 587T577 618Q577 634 545 637Q528 637 528 647Q528 649 530 661Q533 676 535 679T549 683Q551 683 578 682T657 680Q684 680 713 681T746 682Q763 682 763 673Q763 669 760 657T755 643Q753 637 734 637Q662 632 617 587Q608 578 477 424L348 273L322 169Q295 62 295 57Q295 46 363 46Q379 46 384 45T390 35Q390 33 388 23Q384 6 382 4T366 1Q361 1 324 1T232 2Q170 2 138 2T102 1Q84 1 84 9Q84 14 87 24Q88 27 89 30T90 35T91 39T93 42T96 44T101 45T107 45T116 46T129 46Q168 47 180 50T198 63Q201 68 227 171L252 274L129 623Q128 624 127 625T125 627T122 629T118 631T113 633T105 634T96 635T83 636T66 637Z"></path></g></g></g></svg></mjx-container> 参数、带负载的双端口</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 14: Transformers</strong></td>
+<td>变压器原理、耦合系数、理想变压器、等效变压器网络、双调谐电路</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<p><strong>第 12 章</strong>讨论了实际电路设计中最常用的结构——RC 有源滤波器（如 Sallen-Key 拓扑），展示了如何用节点分析法系统地处理运放电路。</p>
+<p><strong>第 11 章</strong>引入了稳定性概念（通过极点位置），这是控制理论和滤波器设计的交叉点。</p>
+<h3 id="模块六：高级主题与计算机方法（第-15–18-章）⭐⭐⭐⭐"><a href="#模块六：高级主题与计算机方法（第-15–18-章）⭐⭐⭐⭐" class="headerlink" title="模块六：高级主题与计算机方法（第 15–18 章）⭐⭐⭐⭐"></a>模块六：高级主题与计算机方法（第 15–18 章）⭐⭐⭐⭐</h3><table>
+<thead>
+<tr>
+<th>章节</th>
+<th>内容</th>
+<th>重要性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Ch 15: Modeling</strong></td>
+<td>源建模、线性放大器模型、FET/BJT 线性模型、二极管非线性模型、Newton-Raphson 迭代、非线性网络求解、数值时域积分</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 16: Sensitivities</strong></td>
+<td>灵敏度定义、调谐电路灵敏度、网络函数灵敏度、<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.439ex;" xmlns="http://www.w3.org/2000/svg" width="1.79ex" height="2.032ex" role="img" focusable="false" viewBox="0 -704 791 898"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D444" d="M399 -80Q399 -47 400 -30T402 -11V-7L387 -11Q341 -22 303 -22Q208 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435Q740 255 592 107Q529 47 461 16L444 8V3Q444 2 449 -24T470 -66T516 -82Q551 -82 583 -60T625 -3Q631 11 638 11Q647 11 649 2Q649 -6 639 -34T611 -100T557 -165T481 -194Q399 -194 399 -87V-80ZM636 468Q636 523 621 564T580 625T530 655T477 665Q429 665 379 640Q277 591 215 464T153 216Q153 110 207 59Q231 38 236 38V46Q236 86 269 120T347 155Q372 155 390 144T417 114T429 82T435 55L448 64Q512 108 557 185T619 334T636 468ZM314 18Q362 18 404 39L403 49Q399 104 366 115Q354 117 347 117Q344 117 341 117T337 118Q317 118 296 98T274 52Q274 18 314 18Z"></path></g></g></g></svg></mjx-container> 和 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.375ex;" xmlns="http://www.w3.org/2000/svg" width="2.395ex" height="1.377ex" role="img" focusable="false" viewBox="0 -443 1058.6 608.6"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D714" d="M495 384Q495 406 514 424T555 443Q574 443 589 425T604 364Q604 334 592 278T555 155T483 38T377 -11Q297 -11 267 66Q266 68 260 61Q201 -11 125 -11Q15 -11 15 139Q15 230 56 325T123 434Q135 441 147 436Q160 429 160 418Q160 406 140 379T94 306T62 208Q61 202 61 187Q61 124 85 100T143 76Q201 76 245 129L253 137V156Q258 297 317 297Q348 297 348 261Q348 243 338 213T318 158L308 135Q309 133 310 129T318 115T334 97T358 83T393 76Q456 76 501 148T546 274Q546 305 533 325T508 357T495 384Z"></path></g><g data-mml-node="mn" transform="translate(655,-150) scale(0.707)"><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path></g></g></g></g></svg></mjx-container> 灵敏度、零极点灵敏度</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 17: Modified Nodal Formulation</strong></td>
+<td>MNF 的被动元件/独立源/受控源处理、理想运放和变压器的 MNF 表示、计算机应用</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Ch 18: Fourier Series and Transformation</strong></td>
+<td>傅里叶级数、傅里叶积分（限定 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.312ex;" xmlns="http://www.w3.org/2000/svg" width="4.965ex" height="1.819ex" role="img" focusable="false" viewBox="0 -666 2194.6 804"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D461" d="M26 385Q19 392 19 395Q19 399 22 411T27 425Q29 430 36 430T87 431H140L159 511Q162 522 166 540T173 566T179 586T187 603T197 615T211 624T229 626Q247 625 254 615T261 596Q261 589 252 549T232 470L222 433Q222 431 272 431H323Q330 424 330 420Q330 398 317 385H210L174 240Q135 80 135 68Q135 26 162 26Q197 26 230 60T283 144Q285 150 288 151T303 153H307Q322 153 322 145Q322 142 319 133Q314 117 301 95T267 48T216 6T155 -11Q125 -11 98 4T59 56Q57 64 57 83V101L92 241Q127 382 128 383Q128 385 77 385H26Z"></path></g><g data-mml-node="mo" transform="translate(638.8,0)"><path data-c="2265" d="M83 616Q83 624 89 630T99 636Q107 636 253 568T543 431T687 361Q694 356 694 346T687 331Q685 329 395 192L107 56H101Q83 58 83 76Q83 77 83 79Q82 86 98 95Q117 105 248 167Q326 204 378 228L626 346L360 472Q291 505 200 548Q112 589 98 597T83 616ZM84 -118Q84 -108 99 -98H678Q694 -104 694 -118Q694 -130 679 -138H98Q84 -131 84 -118Z"></path></g><g data-mml-node="mn" transform="translate(1694.6,0)"><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path></g></g></g></svg></mjx-container>）</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<p><strong>第 15 章</strong>是全书内容最丰富的一章，从线性建模过渡到非线性世界，介绍了 Newton-Raphson 迭代和 Backward Euler 数值积分——这正是 SPICE 仿真器在瞬态分析中所用的算法。</p>
+<p><strong>第 16 章</strong>的灵敏度分析回答的是工程师最关心的问题之一：元件参数变化对电路性能有多大影响？这在批量生产（元件容差）和优化设计中都是关键考量。</p>
+<p><strong>第 17 章（MNF）是全书的理论顶点。</strong> MNF 是节点分析的扩展，能够处理所有四类受控源、理想运放和变压器。Vlach 明确指出：这是计算机程序使用的方法——“not suitable for hand calculations”，但了解其原理对理解仿真器的工作方式至关重要。</p>
+<p><strong>第 18 章</strong>的傅里叶变换被限制在 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.312ex;" xmlns="http://www.w3.org/2000/svg" width="4.965ex" height="1.819ex" role="img" focusable="false" viewBox="0 -666 2194.6 804"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D461" d="M26 385Q19 392 19 395Q19 399 22 411T27 425Q29 430 36 430T87 431H140L159 511Q162 522 166 540T173 566T179 586T187 603T197 615T211 624T229 626Q247 625 254 615T261 596Q261 589 252 549T232 470L222 433Q222 431 272 431H323Q330 424 330 420Q330 398 317 385H210L174 240Q135 80 135 68Q135 26 162 26Q197 26 230 60T283 144Q285 150 288 151T303 153H307Q322 153 322 145Q322 142 319 133Q314 117 301 95T267 48T216 6T155 -11Q125 -11 98 4T59 56Q57 64 57 83V101L92 241Q127 382 128 383Q128 385 77 385H26Z"></path></g><g data-mml-node="mo" transform="translate(638.8,0)"><path data-c="2265" d="M83 616Q83 624 89 630T99 636Q107 636 253 568T543 431T687 361Q694 356 694 346T687 331Q685 329 395 192L107 56H101Q83 58 83 76Q83 77 83 79Q82 86 98 95Q117 105 248 167Q326 204 378 228L626 346L360 472Q291 505 200 548Q112 589 98 597T83 616ZM84 -118Q84 -108 99 -98H678Q694 -104 694 -118Q694 -130 679 -138H98Q84 -131 84 -118Z"></path></g><g data-mml-node="mn" transform="translate(1694.6,0)"><path data-c="30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path></g></g></g></svg></mjx-container> 的情形（即实际信号的范畴），这使得傅里叶积分与拉普拉斯变换之间只需 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.462ex;" xmlns="http://www.w3.org/2000/svg" width="6.92ex" height="1.957ex" role="img" focusable="false" viewBox="0 -661 3058.6 865"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g><g data-mml-node="mo" transform="translate(746.8,0)"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g><g data-mml-node="mi" transform="translate(2024.6,0)"><path data-c="1D457" d="M297 596Q297 627 318 644T361 661Q378 661 389 651T403 623Q403 595 384 576T340 557Q322 557 310 567T297 596ZM288 376Q288 405 262 405Q240 405 220 393T185 362T161 325T144 293L137 279Q135 278 121 278H107Q101 284 101 286T105 299Q126 348 164 391T252 441Q253 441 260 441T272 442Q296 441 316 432Q341 418 354 401T367 348V332L318 133Q267 -67 264 -75Q246 -125 194 -164T75 -204Q25 -204 7 -183T-12 -137Q-12 -110 7 -91T53 -71Q70 -71 82 -81T95 -112Q95 -148 63 -167Q69 -168 77 -168Q111 -168 139 -140T182 -74L193 -32Q204 11 219 72T251 197T278 308T289 365Q289 372 288 376Z"></path></g><g data-mml-node="mi" transform="translate(2436.6,0)"><path data-c="1D714" d="M495 384Q495 406 514 424T555 443Q574 443 589 425T604 364Q604 334 592 278T555 155T483 38T377 -11Q297 -11 267 66Q266 68 260 61Q201 -11 125 -11Q15 -11 15 139Q15 230 56 325T123 434Q135 441 147 436Q160 429 160 418Q160 406 140 379T94 306T62 208Q61 202 61 187Q61 124 85 100T143 76Q201 76 245 129L253 137V156Q258 297 317 297Q348 297 348 261Q348 243 338 213T318 158L308 135Q309 133 310 129T318 115T334 97T358 83T393 76Q456 76 501 148T546 274Q546 305 533 325T508 357T495 384Z"></path></g></g></g></svg></mjx-container> 代换——这是一个巧妙的简化，将两个看似无关的主题统一在同一个框架下。</p>
+<hr>
+<h2 id="这本书的核心思想"><a href="#这本书的核心思想" class="headerlink" title="这本书的核心思想"></a>这本书的核心思想</h2><p>如果用一句话概括 Vlach 的教学策略：</p>
+<blockquote>
+<p><strong>用矩阵代数统一手算与机算，用 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.023ex;" xmlns="http://www.w3.org/2000/svg" width="1.061ex" height="1.023ex" role="img" focusable="false" viewBox="0 -442 469 452"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g></g></g></svg></mjx-container> 变量统一频域与时域。</strong></p>
+</blockquote>
+<p>具体体现在：</p>
+<ol>
+<li><strong>矩阵从第三章开始</strong>：不是在学完所有电路理论后才引入，而是作为求解工具从一开始就使用。</li>
+<li><strong>Cramer 法则优先于消元法</strong>：适合手算（最多 4 个方程），也适合符号分析，且自然导向矩阵形式。</li>
+<li><strong><mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.023ex;" xmlns="http://www.w3.org/2000/svg" width="1.061ex" height="1.023ex" role="img" focusable="false" viewBox="0 -442 469 452"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g></g></g></svg></mjx-container> 变量统一动态分析</strong>：电容和电感用 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.043ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2229 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(500,0)"><g data-mml-node="mo"><path data-c="2F" d="M423 750Q432 750 438 744T444 730Q444 725 271 248T92 -240Q85 -250 75 -250Q68 -250 62 -245T56 -231Q56 -221 230 257T407 740Q411 750 423 750Z"></path></g></g><g data-mml-node="mi" transform="translate(1000,0)"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g><g data-mml-node="mi" transform="translate(1469,0)"><path data-c="1D436" d="M50 252Q50 367 117 473T286 641T490 704Q580 704 633 653Q642 643 648 636T656 626L657 623Q660 623 684 649Q691 655 699 663T715 679T725 690L740 705H746Q760 705 760 698Q760 694 728 561Q692 422 692 421Q690 416 687 415T669 413H653Q647 419 647 422Q647 423 648 429T650 449T651 481Q651 552 619 605T510 659Q484 659 454 652T382 628T299 572T226 479Q194 422 175 346T156 222Q156 108 232 58Q280 24 350 24Q441 24 512 92T606 240Q610 253 612 255T628 257Q648 257 648 248Q648 243 647 239Q618 132 523 55T319 -22Q206 -22 128 53T50 252Z"></path></g></g></g></svg></mjx-container> 和 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.023ex;" xmlns="http://www.w3.org/2000/svg" width="2.602ex" height="1.568ex" role="img" focusable="false" viewBox="0 -683 1150 693"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g><g data-mml-node="mi" transform="translate(469,0)"><path data-c="1D43F" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 217 683Q271 680 344 680Q485 680 506 683H518Q524 677 524 674T522 656Q517 641 513 637H475Q406 636 394 628Q387 624 380 600T313 336Q297 271 279 198T252 88L243 52Q243 48 252 48T311 46H328Q360 46 379 47T428 54T478 72T522 106T564 161Q580 191 594 228T611 270Q616 273 628 273H641Q647 264 647 262T627 203T583 83T557 9Q555 4 553 3T537 0T494 -1Q483 -1 418 -1T294 0H116Q32 0 32 10Q32 17 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path></g></g></g></svg></mjx-container> 表示，<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.462ex;" xmlns="http://www.w3.org/2000/svg" width="6.418ex" height="1.957ex" role="img" focusable="false" viewBox="0 -661 2836.6 865"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D460" d="M131 289Q131 321 147 354T203 415T300 442Q362 442 390 415T419 355Q419 323 402 308T364 292Q351 292 340 300T328 326Q328 342 337 354T354 372T367 378Q368 378 368 379Q368 382 361 388T336 399T297 405Q249 405 227 379T204 326Q204 301 223 291T278 274T330 259Q396 230 396 163Q396 135 385 107T352 51T289 7T195 -10Q118 -10 86 19T53 87Q53 126 74 143T118 160Q133 160 146 151T160 120Q160 94 142 76T111 58Q109 57 108 57T107 55Q108 52 115 47T146 34T201 27Q237 27 263 38T301 66T318 97T323 122Q323 150 302 164T254 181T195 196T148 231Q131 256 131 289Z"></path></g><g data-mml-node="mo" transform="translate(746.8,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mi" transform="translate(1802.6,0)"><path data-c="1D457" d="M297 596Q297 627 318 644T361 661Q378 661 389 651T403 623Q403 595 384 576T340 557Q322 557 310 567T297 596ZM288 376Q288 405 262 405Q240 405 220 393T185 362T161 325T144 293L137 279Q135 278 121 278H107Q101 284 101 286T105 299Q126 348 164 391T252 441Q253 441 260 441T272 442Q296 441 316 432Q341 418 354 401T367 348V332L318 133Q267 -67 264 -75Q246 -125 194 -164T75 -204Q25 -204 7 -183T-12 -137Q-12 -110 7 -91T53 -71Q70 -71 82 -81T95 -112Q95 -148 63 -167Q69 -168 77 -168Q111 -168 139 -140T182 -74L193 -32Q204 11 219 72T251 197T278 308T289 365Q289 372 288 376Z"></path></g><g data-mml-node="mi" transform="translate(2214.6,0)"><path data-c="1D714" d="M495 384Q495 406 514 424T555 443Q574 443 589 425T604 364Q604 334 592 278T555 155T483 38T377 -11Q297 -11 267 66Q266 68 260 61Q201 -11 125 -11Q15 -11 15 139Q15 230 56 325T123 434Q135 441 147 436Q160 429 160 418Q160 406 140 379T94 306T62 208Q61 202 61 187Q61 124 85 100T143 76Q201 76 245 129L253 137V156Q258 297 317 297Q348 297 348 261Q348 243 338 213T318 158L308 135Q309 133 310 129T318 115T334 97T358 83T393 76Q456 76 501 148T546 274Q546 305 533 325T508 357T495 384Z"></path></g></g></g></svg></mjx-container> 代入即得频域响应，拉普拉斯反变换即得时域响应——三个域用一个变量串联。</li>
+<li><strong>电导 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="1.778ex" height="1.645ex" role="img" focusable="false" viewBox="0 -705 786 727"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D43A" d="M50 252Q50 367 117 473T286 641T490 704Q580 704 633 653Q642 643 648 636T656 626L657 623Q660 623 684 649Q691 655 699 663T715 679T725 690L740 705H746Q760 705 760 698Q760 694 728 561Q692 422 692 421Q690 416 687 415T669 413H653Q647 419 647 422Q647 423 648 429T650 449T651 481Q651 552 619 605T510 659Q492 659 471 656T418 643T357 615T294 567T236 496T189 394T158 260Q156 242 156 221Q156 173 170 136T206 79T256 45T308 28T353 24Q407 24 452 47T514 106Q517 114 529 161T541 214Q541 222 528 224T468 227H431Q425 233 425 235T427 254Q431 267 437 273H454Q494 271 594 271Q634 271 659 271T695 272T707 272Q721 272 721 263Q721 261 719 249Q714 230 709 228Q706 227 694 227Q674 227 653 224Q646 221 643 215T629 164Q620 131 614 108Q589 6 586 3Q584 1 581 1Q571 1 553 21T530 52Q530 53 528 52T522 47Q448 -22 322 -22Q201 -22 126 55T50 252Z"></path></g></g></g></svg></mjx-container> 而非电阻 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.048ex;" xmlns="http://www.w3.org/2000/svg" width="1.717ex" height="1.593ex" role="img" focusable="false" viewBox="0 -683 759 704"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D445" d="M230 637Q203 637 198 638T193 649Q193 676 204 682Q206 683 378 683Q550 682 564 680Q620 672 658 652T712 606T733 563T739 529Q739 484 710 445T643 385T576 351T538 338L545 333Q612 295 612 223Q612 212 607 162T602 80V71Q602 53 603 43T614 25T640 16Q668 16 686 38T712 85Q717 99 720 102T735 105Q755 105 755 93Q755 75 731 36Q693 -21 641 -21H632Q571 -21 531 4T487 82Q487 109 502 166T517 239Q517 290 474 313Q459 320 449 321T378 323H309L277 193Q244 61 244 59Q244 55 245 54T252 50T269 48T302 46H333Q339 38 339 37T336 19Q332 6 326 0H311Q275 2 180 2Q146 2 117 2T71 2T50 1Q33 1 33 10Q33 12 36 24Q41 43 46 45Q50 46 61 46H67Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628Q287 635 230 637ZM630 554Q630 586 609 608T523 636Q521 636 500 636T462 637H440Q393 637 386 627Q385 624 352 494T319 361Q319 360 388 360Q466 361 492 367Q556 377 592 426Q608 449 619 486T630 554Z"></path></g></g></g></svg></mjx-container></strong>：节点分析中一律用电导，避免 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="3.98ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 1759 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><path data-c="31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(500,0)"><g data-mml-node="mo"><path data-c="2F" d="M423 750Q432 750 438 744T444 730Q444 725 271 248T92 -240Q85 -250 75 -250Q68 -250 62 -245T56 -231Q56 -221 230 257T407 740Q411 750 423 750Z"></path></g></g><g data-mml-node="mi" transform="translate(1000,0)"><path data-c="1D445" d="M230 637Q203 637 198 638T193 649Q193 676 204 682Q206 683 378 683Q550 682 564 680Q620 672 658 652T712 606T733 563T739 529Q739 484 710 445T643 385T576 351T538 338L545 333Q612 295 612 223Q612 212 607 162T602 80V71Q602 53 603 43T614 25T640 16Q668 16 686 38T712 85Q717 99 720 102T735 105Q755 105 755 93Q755 75 731 36Q693 -21 641 -21H632Q571 -21 531 4T487 82Q487 109 502 166T517 239Q517 290 474 313Q459 320 449 321T378 323H309L277 193Q244 61 244 59Q244 55 245 54T252 50T269 48T302 46H333Q339 38 339 37T336 19Q332 6 326 0H311Q275 2 180 2Q146 2 117 2T71 2T50 1Q33 1 33 10Q33 12 36 24Q41 43 46 45Q50 46 61 46H67Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628Q287 635 230 637ZM630 554Q630 586 609 608T523 636Q521 636 500 636T462 637H440Q393 637 386 627Q385 624 352 494T319 361Q319 360 388 360Q466 361 492 367Q556 377 592 426Q608 449 619 486T630 554Z"></path></g></g></g></svg></mjx-container> 分数。</li>
+<li><strong>所有问题都按”基本单位”计算</strong>：<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.633ex" height="1.593ex" role="img" focusable="false" viewBox="0 -704 722 704"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="3A9" d="M55 454Q55 503 75 546T127 617T197 665T272 695T337 704H352Q396 704 404 703Q527 687 596 615T666 454Q666 392 635 330T559 200T499 83V80H543Q589 81 600 83T617 93Q622 102 629 135T636 172L637 177H677V175L660 89Q645 3 644 2V0H552H488Q461 0 456 3T451 20Q451 89 499 235T548 455Q548 512 530 555T483 622T424 656T361 668Q332 668 303 658T243 626T193 560T174 456Q174 380 222 233T270 20Q270 7 263 0H77V2Q76 3 61 89L44 175V177H84L85 172Q85 171 88 155T96 119T104 93Q109 86 120 84T178 80H222V83Q206 132 162 199T87 329T55 454Z"></path></g></g></g></svg></mjx-container>、F、H 和整数元件值——这消除了”实际工程数值”对初学者的干扰。附录中说明了如何通过缩放将任意网络归一到单位值。</li>
+</ol>
+<hr>
+<h2 id="重要性与适用人群"><a href="#重要性与适用人群" class="headerlink" title="重要性与适用人群"></a>重要性与适用人群</h2><table>
+<thead>
+<tr>
+<th>人群</th>
+<th>推荐程度</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>本科大一/大二学生</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>从零开始，覆盖本科全部线性电路内容</td>
+</tr>
+<tr>
+<td><strong>自学电路理论者</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>大量手算例题，完整的习题解答手册</td>
+</tr>
+<tr>
+<td><strong>需要理解 SPICE 原理的工程师</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>第 15–17 章解释了仿真器的底层算法</td>
+</tr>
+<tr>
+<td><strong>准备考研/面试者</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>系统性复习电路理论的好教材</td>
+</tr>
+<tr>
+<td><strong>已学过电路但想换个视角的读者</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>矩阵方法提供了不同于传统教材的视角</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="与同类书籍的对比"><a href="#与同类书籍的对比" class="headerlink" title="与同类书籍的对比"></a>与同类书籍的对比</h2><p>相比 Hayt 的 <em>Engineering Circuit Analysis</em> 或 Nilsson &amp; Riedel 的 <em>Electric Circuits</em>，Vlach 这本书最鲜明的特色是<strong>矩阵优先</strong>。传统教材通常把矩阵/行列式放在附录或”高级方法”章节，而 Vlach 把它放在第三章，与节点/网孔分析紧密结合。这使得：</p>
+<ul>
+<li>方程建立和解方程之间的过渡极其自然</li>
+<li>符号分析从一开始就是可行的（而非到了高阶课程才引入）</li>
+<li>从手算过渡到计算机求解几乎没有认知断层</li>
+</ul>
+<p>缺点方面：这本书假设读者有微积分基础但没有电路基础——这既是优点（自包含）也是限制（缺乏对工程背景的展开）。</p>
+<hr>
+<h2 id="建议的阅读路线"><a href="#建议的阅读路线" class="headerlink" title="建议的阅读路线"></a>建议的阅读路线</h2><ol>
+<li><strong>必读</strong>（电路理论核心）：Ch 1–5, Ch 9</li>
+<li><strong>强烈推荐</strong>（奠定设计能力）：Ch 7–8, Ch 10–12, Ch 16</li>
+<li><strong>进阶</strong>（理解仿真器）：Ch 15, Ch 17</li>
+<li><strong>参考</strong>：Ch 6, Ch 13–14, Ch 18</li>
+</ol>
+<p>如果你只有 10 个小时，读 Ch 3（矩阵方法）、Ch 5（网络变换）、Ch 9（拉普拉斯变换）和 Ch 17（MNF）——这四个章节集中体现了 Vlach 矩阵方法的精髓，也是理解”电路分析如何从手算走向计算机”的最短路径。</p>
+<hr>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>Vlach 在序言中写道：</p>
+<blockquote>
+<p>“Circuit theory, developed in the twentieth century, supports today a huge industrial section of analog networks. Most designs are done by computers, but the need to thoroughly understand the theory remains.”</p>
+</blockquote>
+<p>这本书的价值不在于教你用哪个软件，而在于告诉你<strong>软件背后的矩阵在做什么</strong>。当你明白 MNF 如何将运放、变压器和非线性元件塞进一个线性方程组时，你就从”会用 SPICE”变成了”理解 SPICE”。</p>
+<p>在当前 AI 辅助电路设计的时代，这种底层理解反而变得更加珍贵——因为你可以判断仿真结果是否合理，而不是盲目信任计算机的输出。</p>
+<hr>
+<p><em>Further reading: Jiri Vlach &amp; Kishore Singhal, “Computer Methods for Circuit Analysis and Design,” 2nd Edition, Van Nostrand Reinhold, 1994.</em></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://fanchanghong650-hub.github.io">Fam_RiverBird</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://fanchanghong650-hub.github.io/2026/05/29/linear-circuit-theory-matrix-method/">https://fanchanghong650-hub.github.io/2026/05/29/linear-circuit-theory-matrix-method/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://fanchanghong650-hub.github.io" target="_blank">桜ノ詩の庭</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%94%B5%E8%B7%AF%E5%88%86%E6%9E%90/">电路分析</a><a class="post-meta__tags" href="/tags/%E7%9F%A9%E9%98%B5%E4%BB%A3%E6%95%B0/">矩阵代数</a><a class="post-meta__tags" href="/tags/%E8%8A%82%E7%82%B9%E5%88%86%E6%9E%90/">节点分析</a><a class="post-meta__tags" href="/tags/%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E5%8F%98%E6%8D%A2/">拉普拉斯变换</a><a class="post-meta__tags" href="/tags/%E7%81%B5%E6%95%8F%E5%BA%A6%E5%88%86%E6%9E%90/">灵敏度分析</a><a class="post-meta__tags" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%BE%85%E5%8A%A9%E8%AE%BE%E8%AE%A1/">计算机辅助设计</a><a class="post-meta__tags" href="/tags/%E7%BA%BF%E6%80%A7%E7%94%B5%E8%B7%AF/">线性电路</a></div><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/05/29/claude-code-deepseek-v4-guide/" title="Claude Code + DeepSeek V4 Pro 终极配置指南"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Claude Code + DeepSeek V4 Pro 终极配置指南</div></div><div class="info-2"><div class="info-item-1"> 用 DeepSeek V4 Pro 驱动 Claude Code，低成本享受顶级 AI 编程体验。   1. 这是什么？Claude Code 是 Anthropic 推出的 AI 编程 CLI 工具，原生需要调用 Anthropic API。 DeepSeek 提供了 Anthropic 兼容 API 端点（https://api.deepseek.com/anthropic），可以无缝替代 Anthropic 原生 API。 这样一来，你就能以 DeepSeek 的价格，享受 Claude Code 的完整功能。 成本对比   提供商 模型 输入价格 (每百万 token) 输出价格 (每百万 token)    Anthropic Claude Opus 4.5 $15.00 $75.00   DeepSeek V4 Pro ¥2.00 (~$0.28) ¥8.00 (~$1.10)   DeepSeek V4 Flash ¥0.50 (~$0.07) ¥2.00 (~$0.28)   成本降低约 50-100 倍。  2. 两种方案：直连 vs 代理方案 A：直连（推荐...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Fam_RiverBird</div><div class="author-info-description">记录数学思考与编程笔记 — 桜色の個人ブログ</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">82</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E6%9C%AC%E4%B9%A6%E5%80%BC%E5%BE%97%E5%85%B3%E6%B3%A8"><span class="toc-number">1.</span> <span class="toc-text">为什么这本书值得关注</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%9C%E8%80%85%E8%83%8C%E6%99%AF"><span class="toc-number">2.</span> <span class="toc-text">作者背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E4%B9%A6%E7%BB%93%E6%9E%84%EF%BC%9A%E4%BB%8E%E5%9F%BA%E7%A1%80%E5%85%83%E4%BB%B6%E5%88%B0%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%AE%97%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">全书结构：从基础元件到计算机算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%EF%BC%88%E7%AC%AC-1%E2%80%932-%E7%AB%A0%EF%BC%89%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90-%E5%BF%85%E8%AF%BB"><span class="toc-number">3.1.</span> <span class="toc-text">模块一：基础（第 1–2 章）⭐⭐⭐⭐⭐ 必读</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E4%BA%8C%EF%BC%9A%E7%9F%A9%E9%98%B5%E6%96%B9%E6%B3%95%E4%B8%8E%E5%8F%97%E6%8E%A7%E6%BA%90%EF%BC%88%E7%AC%AC-3%E2%80%935-%E7%AB%A0%EF%BC%89%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90-%E6%9C%AC%E4%B9%A6%E6%A0%B8%E5%BF%83"><span class="toc-number">3.2.</span> <span class="toc-text">模块二：矩阵方法与受控源（第 3–5 章）⭐⭐⭐⭐⭐ 本书核心</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E4%B8%89%EF%BC%9A%E5%8A%A8%E6%80%81%E5%85%83%E4%BB%B6%E4%B8%8E%E9%A2%91%E5%9F%9F%EF%BC%88%E7%AC%AC-6%E2%80%938-%E7%AB%A0%EF%BC%89%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90"><span class="toc-number">3.3.</span> <span class="toc-text">模块三：动态元件与频域（第 6–8 章）⭐⭐⭐⭐</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E5%9B%9B%EF%BC%9A%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E5%8F%98%E6%8D%A2%E4%B8%8E%E6%97%B6%E5%9F%9F%E5%88%86%E6%9E%90%EF%BC%88%E7%AC%AC-9%E2%80%9310-%E7%AB%A0%EF%BC%89%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90"><span class="toc-number">3.4.</span> <span class="toc-text">模块四：拉普拉斯变换与时域分析（第 9–10 章）⭐⭐⭐⭐⭐</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E4%BA%94%EF%BC%9A%E7%BD%91%E7%BB%9C%E5%87%BD%E6%95%B0%E3%80%81%E6%9C%89%E6%BA%90%E7%BD%91%E7%BB%9C%E4%B8%8E%E5%8F%8C%E7%AB%AF%E5%8F%A3%EF%BC%88%E7%AC%AC-11%E2%80%9314-%E7%AB%A0%EF%BC%89%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90"><span class="toc-number">3.5.</span> <span class="toc-text">模块五：网络函数、有源网络与双端口（第 11–14 章）⭐⭐⭐⭐</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E5%85%AD%EF%BC%9A%E9%AB%98%E7%BA%A7%E4%B8%BB%E9%A2%98%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%96%B9%E6%B3%95%EF%BC%88%E7%AC%AC-15%E2%80%9318-%E7%AB%A0%EF%BC%89%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90"><span class="toc-number">3.6.</span> <span class="toc-text">模块六：高级主题与计算机方法（第 15–18 章）⭐⭐⭐⭐</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%99%E6%9C%AC%E4%B9%A6%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3"><span class="toc-number">4.</span> <span class="toc-text">这本书的核心思想</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%87%8D%E8%A6%81%E6%80%A7%E4%B8%8E%E9%80%82%E7%94%A8%E4%BA%BA%E7%BE%A4"><span class="toc-number">5.</span> <span class="toc-text">重要性与适用人群</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8E%E5%90%8C%E7%B1%BB%E4%B9%A6%E7%B1%8D%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="toc-number">6.</span> <span class="toc-text">与同类书籍的对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BB%BA%E8%AE%AE%E7%9A%84%E9%98%85%E8%AF%BB%E8%B7%AF%E7%BA%BF"><span class="toc-number">7.</span> <span class="toc-text">建议的阅读路线</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">8.</span> <span class="toc-text">结语</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/29/linear-circuit-theory-matrix-method/" title="《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材">《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材</a><time datetime="2026-05-29T12:00:00.000Z" title="发表于 2026-05-29 20:00:00">2026-05-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/29/claude-code-deepseek-v4-guide/" title="Claude Code + DeepSeek V4 Pro 终极配置指南">Claude Code + DeepSeek V4 Pro 终极配置指南</a><time datetime="2026-05-29T11:30:00.000Z" title="发表于 2026-05-29 19:30:00">2026-05-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/29/probability-ch2-conditional-probability/" title="概率论第二章「条件概率」— 用 2/8 法则抓住整本书的灵魂">概率论第二章「条件概率」— 用 2/8 法则抓住整本书的灵魂</a><time datetime="2026-05-29T02:00:00.000Z" title="发表于 2026-05-29 10:00:00">2026-05-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/29/probability-ch3-random-variables/" title="概率论第三章「随机变量及其分布」— 用 2/8 法则理解&quot;分布的故事&quot;">概率论第三章「随机变量及其分布」— 用 2/8 法则理解&quot;分布的故事&quot;</a><time datetime="2026-05-29T01:50:00.000Z" title="发表于 2026-05-29 09:50:00">2026-05-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/29/probability-ch4-expectation/" title="概率论第四章「期望」— 线性性质的威力与条件期望的智慧">概率论第四章「期望」— 线性性质的威力与条件期望的智慧</a><time datetime="2026-05-29T01:40:00.000Z" title="发表于 2026-05-29 09:40:00">2026-05-29</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Fam_RiverBird</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/sakura-petals.js"></script><script src="/js/bg-slideshow.js"></script><script src="/js/click-solid.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"jsonPath":"/live2dw/assets/miku.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body></html>
