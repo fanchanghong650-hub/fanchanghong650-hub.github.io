@@ -1,0 +1,891 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>AI 阅读电路图的能力边界——一次系统化的工具链实验 | 桜ノ詩の庭</title><meta name="author" content="Fam_RiverBird"><meta name="copyright" content="Fam_RiverBird"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#FFF5F5"><meta name="description" content="问题的起点让 AI 分析电路问题有一个致命瓶颈：AI 能计算，但看不懂电路图。 这就好比一个数学家被要求解题，但题目写在了一张他看不见的照片里。他可以解方程、写矩阵、算行列式——但前提是他知道电路长什么样。 本文记录了我在 2026 年 5 月 29 日进行的一次系统化实验：试图搭一个工具链，让 Claude Code 能够从图片中提取电路拓扑结构，再结合电路分析方法求解。以下是完整的方法、发现和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 阅读电路图的能力边界——一次系统化的工具链实验">
+<meta property="og:url" content="https://fanchanghong650-hub.github.io/2026/05/29/ai-circuit-diagram-reading-experiment/index.html">
+<meta property="og:site_name" content="桜ノ詩の庭">
+<meta property="og:description" content="问题的起点让 AI 分析电路问题有一个致命瓶颈：AI 能计算，但看不懂电路图。 这就好比一个数学家被要求解题，但题目写在了一张他看不见的照片里。他可以解方程、写矩阵、算行列式——但前提是他知道电路长什么样。 本文记录了我在 2026 年 5 月 29 日进行的一次系统化实验：试图搭一个工具链，让 Claude Code 能够从图片中提取电路拓扑结构，再结合电路分析方法求解。以下是完整的方法、发现和">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://fanchanghong650-hub.github.io/img/butterfly-icon.png">
+<meta property="article:published_time" content="2026-05-29T15:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-29T13:51:40.842Z">
+<meta property="article:author" content="Fam_RiverBird">
+<meta property="article:tag" content="Claude">
+<meta property="article:tag" content="OCR">
+<meta property="article:tag" content="SPICE">
+<meta property="article:tag" content="YOLO">
+<meta property="article:tag" content="拓扑识别">
+<meta property="article:tag" content="电路分析">
+<meta property="article:tag" content="计算机视觉">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fanchanghong650-hub.github.io/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "AI 阅读电路图的能力边界——一次系统化的工具链实验",
+  "url": "https://fanchanghong650-hub.github.io/2026/05/29/ai-circuit-diagram-reading-experiment/",
+  "image": "https://fanchanghong650-hub.github.io/img/butterfly-icon.png",
+  "datePublished": "2026-05-29T15:00:00.000Z",
+  "dateModified": "2026-05-29T13:51:40.842Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Fam_RiverBird",
+      "url": "https://fanchanghong650-hub.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://fanchanghong650-hub.github.io/2026/05/29/ai-circuit-diagram-reading-experiment/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#2D1818')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#FFF5F5')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'AI 阅读电路图的能力边界——一次系统化的工具链实验',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><script src="/js/body-class.js"></script><meta name="generator" content="Hexo 8.1.2"><style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">17</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">88</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">桜ノ詩の庭</span></a><a class="nav-page-title" href="/"><span class="site-name">AI 阅读电路图的能力边界——一次系统化的工具链实验</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">AI 阅读电路图的能力边界——一次系统化的工具链实验</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-29T15:00:00.000Z" title="发表于 2026-05-29 23:00:00">2026-05-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-29T13:51:40.842Z" title="更新于 2026-05-29 21:51:40">2026-05-29</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%94%B5%E5%AD%90%E5%B7%A5%E7%A8%8B/">电子工程</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%94%B5%E5%AD%90%E5%B7%A5%E7%A8%8B/AI%E5%B7%A5%E5%85%B7/">AI工具</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="问题的起点"><a href="#问题的起点" class="headerlink" title="问题的起点"></a>问题的起点</h2><p>让 AI 分析电路问题有一个致命瓶颈：<strong>AI 能计算，但看不懂电路图。</strong></p>
+<p>这就好比一个数学家被要求解题，但题目写在了一张他看不见的照片里。他可以解方程、写矩阵、算行列式——但前提是他知道电路长什么样。</p>
+<p>本文记录了我在 2026 年 5 月 29 日进行的一次系统化实验：试图搭一个工具链，让 Claude Code 能够从图片中提取电路拓扑结构，再结合电路分析方法求解。以下是完整的方法、发现和结论。</p>
+<hr>
+<h2 id="实验设置"><a href="#实验设置" class="headerlink" title="实验设置"></a>实验设置</h2><p><strong>测试材料</strong>：五道交流电路习题的微信拍照图片，包括正弦稳态分析、RC 选频网络、共轭匹配等题型。</p>
+<p><strong>目标</strong>：从图片中提取电路的完整拓扑结构（元件类型 + 连接关系），然后自动求解。</p>
+<p><strong>基础设施</strong>：</p>
+<ul>
+<li>Python 3.12 (安装在 <code>D:\claude\pdf\</code>)</li>
+<li>Tesseract OCR 5.4.0 (用于文字识别)</li>
+<li>Poppler 25.07 (pdftotext/pdftoppm for PDF)</li>
+<li>PyTorch 2.12 + YOLOv5 (用于元件检测)</li>
+<li>OpenCV + NetworkX (图像处理和拓扑图构建)</li>
+</ul>
+<hr>
+<h2 id="工具链路-1：纯-OCR-方案（Tesseract）"><a href="#工具链路-1：纯-OCR-方案（Tesseract）" class="headerlink" title="工具链路 1：纯 OCR 方案（Tesseract）"></a>工具链路 1：纯 OCR 方案（Tesseract）</h2><h3 id="做了什么"><a href="#做了什么" class="headerlink" title="做了什么"></a>做了什么</h3><p>使用 Tesseract OCR 的中文语言包（<code>chi_sim</code>）直接对图片进行文字识别。</p>
+<h3 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h3><table>
+<thead>
+<tr>
+<th>能力</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>识别中文题目文字</td>
+<td>⭐⭐⭐⭐ 可用（~80% 准确率）</td>
+</tr>
+<tr>
+<td>识别数学符号</td>
+<td>⭐⭐ 差（∠ 变成 Z，√ 变成 W）</td>
+</tr>
+<tr>
+<td>识别下标/上标</td>
+<td>⭐ 很差（V1 变成 Vl，Z_L 变成 Zr）</td>
+</tr>
+<tr>
+<td>识别电路拓扑</td>
+<td>❌ 完全不行</td>
+</tr>
+</tbody></table>
+<p><strong>示例 OCR 输出</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">"图示正弦稳态电路中，电压表 Vl、Va 的读数都为 10Y，则电压表 V 读数为多少?"</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>V1</code> → <code>Vl</code>（下标 1 被识别为字母 l）</li>
+<li><code>V2</code> → <code>Va</code>（下标 2 被识别为字母 a）</li>
+<li><code>10V</code> → <code>10Y</code>（V 被识别为 Y）</li>
+</ul>
+<h3 id="根本问题"><a href="#根本问题" class="headerlink" title="根本问题"></a>根本问题</h3><p>OCR 只能识别<strong>文字</strong>。电路图是<strong>图形</strong>——元件符号、导线、节点——这些对 OCR 来说是不可见的。Tesseract 完全没有电路拓扑的概念。</p>
+<hr>
+<h2 id="工具链路-2：PDF-直接渲染（PyMuPDF-Poppler）"><a href="#工具链路-2：PDF-直接渲染（PyMuPDF-Poppler）" class="headerlink" title="工具链路 2：PDF 直接渲染（PyMuPDF + Poppler）"></a>工具链路 2：PDF 直接渲染（PyMuPDF + Poppler）</h2><h3 id="做了什么-1"><a href="#做了什么-1" class="headerlink" title="做了什么"></a>做了什么</h3><p>如果电路图是 PDF 格式（而非照片），可以用 PyMuPDF 直接提取文本，或用 Poppler 的 <code>pdftoppm</code> 将页面渲染为图片。</p>
+<h3 id="安装的工具"><a href="#安装的工具" class="headerlink" title="安装的工具"></a>安装的工具</h3><table>
+<thead>
+<tr>
+<th>工具</th>
+<th>位置</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Python 3.12 + PyMuPDF</td>
+<td><code>D:\claude\pdf\</code></td>
+<td>PDF 文本提取 + 页面渲染</td>
+</tr>
+<tr>
+<td>Poppler (pdftoppm, pdftotext 等)</td>
+<td><code>D:\claude\pdf reader\poppler\</code></td>
+<td>PDF → 图片/文本转换</td>
+</tr>
+</tbody></table>
+<h3 id="结果-1"><a href="#结果-1" class="headerlink" title="结果"></a>结果</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文字型 PDF（如概率论教材）</td>
+<td>⭐⭐⭐⭐⭐ 完美</td>
+</tr>
+<tr>
+<td>扫描版 PDF（图片页）</td>
+<td>⭐⭐⭐ 能提取图片，但需要后续 OCR</td>
+</tr>
+<tr>
+<td>印刷电路图</td>
+<td>❌ PDF 本身不包含拓扑信息</td>
+</tr>
+</tbody></table>
+<p>PyMuPDF 能直接从 PDF 中提取嵌入的文本，这对<strong>文字型 PDF</strong>（大多数现代电子书）效果极好——例如我们用它成功读取了概率论教材（Blitzstein &amp; Hwang）和电路理论教材（Vlach）的全文。但对于以图片形式嵌入的电路图，这只是把问题从”PDF 中的图片”变成了”图片”——还是没有解决拓扑提取问题。</p>
+<hr>
+<h2 id="工具链路-3：电路专用图像解释器（CircuitSchematicImageInterpreter）"><a href="#工具链路-3：电路专用图像解释器（CircuitSchematicImageInterpreter）" class="headerlink" title="工具链路 3：电路专用图像解释器（CircuitSchematicImageInterpreter）"></a>工具链路 3：电路专用图像解释器（CircuitSchematicImageInterpreter）</h2><h3 id="做了什么-2"><a href="#做了什么-2" class="headerlink" title="做了什么"></a>做了什么</h3><p>克隆并测试了剑桥大学的开源项目 <a target="_blank" rel="noopener" href="https://github.com/C-R-Kelly/CircuitSchematicImageInterpreter">CircuitSchematicImageInterpreter</a>（C. R. Kelly, <code>CK598@cam.ac.uk</code>）。</p>
+<h3 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h3><ol>
+<li><strong>二值化 + 骨架化</strong>：将电路图转化为黑白线条图</li>
+<li><strong>Hough 变换</strong>：检测水平和垂直导线</li>
+<li><strong>导线间隙分析</strong>：识别元件位置（导线之间的断点 = 元件）</li>
+<li><strong>交叉点检测</strong>：找到节点（导线交汇处）</li>
+<li><strong>图构建</strong>：生成 NetworkX 图，构建生成树、余树</li>
+<li><strong>网表生成</strong>：输出 SPICE 仿真网表</li>
+</ol>
+<h3 id="实际测试数据（习题-1）"><a href="#实际测试数据（习题-1）" class="headerlink" title="实际测试数据（习题 1）"></a>实际测试数据（习题 1）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">图片尺寸: 1668×351 像素</span><br><span class="line">检测结果:</span><br><span class="line">  水平导线: 8 条</span><br><span class="line">  垂直导线: 11 条</span><br><span class="line">  元件: 7 个</span><br><span class="line">  节点: 18 个</span><br></pre></td></tr></table></figure>
+
+<p>精确到像素的坐标数据：</p>
+<table>
+<thead>
+<tr>
+<th>元件</th>
+<th>质心 (x,y)</th>
+<th>方向</th>
+<th>连接</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C1</td>
+<td>(328, 104)</td>
+<td>水平</td>
+<td>上轨中段</td>
+</tr>
+<tr>
+<td>C2</td>
+<td>(324, 151)</td>
+<td>水平</td>
+<td>中轨中段</td>
+</tr>
+<tr>
+<td>C3</td>
+<td>(252, 218)</td>
+<td>竖直</td>
+<td>左柱中段</td>
+</tr>
+<tr>
+<td>C4</td>
+<td>(411, 151)</td>
+<td>竖直</td>
+<td>中柱上段（仅 6px 长）</td>
+</tr>
+<tr>
+<td>C5</td>
+<td>(411, 216)</td>
+<td>竖直</td>
+<td>中柱下段</td>
+</tr>
+<tr>
+<td>C6</td>
+<td>(484, 216)</td>
+<td>竖直</td>
+<td>右中柱</td>
+</tr>
+<tr>
+<td>C7</td>
+<td>(540, 218)</td>
+<td>竖直</td>
+<td>右柱</td>
+</tr>
+</tbody></table>
+<h3 id="重构的拓扑图（ASCII）"><a href="#重构的拓扑图（ASCII）" class="headerlink" title="重构的拓扑图（ASCII）"></a>重构的拓扑图（ASCII）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">                    [C1]</span><br><span class="line">上轨 ────────────────□□□────────────────</span><br><span class="line">         │          │          │        │</span><br><span class="line">         │  [C3]    │ [C4]     │ [C7]   │</span><br><span class="line">         │   □      │  □       │  □     │</span><br><span class="line">[V?表] ─┤   □      │ [C5]  [C6]□       │</span><br><span class="line">         │   □      │  □       │        │</span><br><span class="line">中轨 ───┴───□□□─────┴──────────┴────────┘</span><br><span class="line">         │ [C2]     │          │</span><br><span class="line">         │          │          │</span><br><span class="line">下轨 ───┴──────────┴──────────┴────────── (参考地)</span><br></pre></td></tr></table></figure>
+
+<h3 id="效果评估"><a href="#效果评估" class="headerlink" title="效果评估"></a>效果评估</h3><table>
+<thead>
+<tr>
+<th>能力</th>
+<th>效果</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>导线位置检测</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>精确到像素</td>
+</tr>
+<tr>
+<td>元件定位</td>
+<td>⭐⭐⭐⭐</td>
+<td>能识别导线间隙</td>
+</tr>
+<tr>
+<td>节点检测</td>
+<td>⭐⭐⭐⭐</td>
+<td>交叉点基本正确</td>
+</tr>
+<tr>
+<td>拓扑图构建</td>
+<td>⭐⭐⭐⭐</td>
+<td>NetworkX 图 + 生成树</td>
+</tr>
+<tr>
+<td>SPICE 网表生成</td>
+<td>⭐⭐⭐</td>
+<td>依赖 OCR 识别元件类型</td>
+</tr>
+<tr>
+<td><strong>元件类型识别</strong></td>
+<td>⭐</td>
+<td><strong>最大瓶颈——需要自定义 Tesseract 模型</strong></td>
+</tr>
+</tbody></table>
+<h3 id="关键限制"><a href="#关键限制" class="headerlink" title="关键限制"></a>关键限制</h3><ol>
+<li><strong>元件类型 OCR 不可用</strong>：项目需要一个自定义训练过的 Tesseract 模型（<code>model_project_final.traineddata</code>），但这个文件不在公开的 GitHub 仓库中</li>
+<li><strong>对拍照图片敏感</strong>：微信拍照的图片（有畸变、阴影、非均匀光照）比扫描的原理图效果差</li>
+<li><strong>只支持二端子元件</strong>：对于晶体管等多端子器件的处理不完善</li>
+</ol>
+<hr>
+<h2 id="工具链路-4：YOLOv5-元件分类（Electrical-Schema-Recognition）"><a href="#工具链路-4：YOLOv5-元件分类（Electrical-Schema-Recognition）" class="headerlink" title="工具链路 4：YOLOv5 元件分类（Electrical_Schema_Recognition）"></a>工具链路 4：YOLOv5 元件分类（Electrical_Schema_Recognition）</h2><h3 id="做了什么-3"><a href="#做了什么-3" class="headerlink" title="做了什么"></a>做了什么</h3><p>使用 <a target="_blank" rel="noopener" href="https://github.com/azizamari/Electrical_Schema_Recognition">Electrical_Schema_Recognition</a> 的预训练 YOLOv5 模型（<code>modelv1.pt</code>）进行元件类型分类。</p>
+<h3 id="模型信息"><a href="#模型信息" class="headerlink" title="模型信息"></a>模型信息</h3><ul>
+<li>架构：YOLOv5</li>
+<li>训练数据：150 张<strong>手绘</strong>电路图</li>
+<li>类别：capacitor, inductor, voltage source, resistor, diode, lamp（6 类）</li>
+<li>训练精度：~90% mAP（在手绘电路上）</li>
+</ul>
+<h3 id="实际测试结果"><a href="#实际测试结果" class="headerlink" title="实际测试结果"></a>实际测试结果</h3><p><strong>习题 1 检测</strong>（7 个元件）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lamp (0.51), lamp (0.45), lamp (0.45),</span><br><span class="line">voltage (0.44), voltage (0.40), voltage (0.33),</span><br><span class="line">inductor (0.28)</span><br></pre></td></tr></table></figure>
+
+<p><strong>问题</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>圆形电压表被识别为 lamp</td>
+<td>训练数据中 lamp 是唯一的圆形符号</td>
+</tr>
+<tr>
+<td>印刷电阻被识别为 inductor</td>
+<td>印刷体的锯齿/矩形电阻与手绘线圈差异大</td>
+</tr>
+<tr>
+<td>整体置信度偏低（0.25-0.51）</td>
+<td>训练域（手绘）与测试域（印刷）不匹配</td>
+</tr>
+<tr>
+<td>很多元件未被识别</td>
+<td>6 个类别太少，不包含电压表/电流表/地线等</td>
+</tr>
+</tbody></table>
+<h3 id="效果评估-1"><a href="#效果评估-1" class="headerlink" title="效果评估"></a>效果评估</h3><table>
+<thead>
+<tr>
+<th>能力</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>元件<strong>位置</strong>检测</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>元件<strong>类型</strong>分类（手绘图）</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>元件<strong>类型</strong>分类（印刷图）</td>
+<td>⭐ 很差</td>
+</tr>
+<tr>
+<td>类别覆盖度</td>
+<td>⭐ 只有 6 类</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="工具链路-5：其他探索过的项目"><a href="#工具链路-5：其他探索过的项目" class="headerlink" title="工具链路 5：其他探索过的项目"></a>工具链路 5：其他探索过的项目</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>状态</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="https://github.com/VisionMillionDataStudio/CirAI809">CirAI809</a></td>
+<td>❌ 未使用</td>
+<td>18 类印刷电路数据集，但只含图片不含模型权重</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://github.com/tonny-2200/circuitry">Circuitry.ai</a></td>
+<td>⚠️ 未测试</td>
+<td>YOLOv8 + LLaMA3，需要 GPU</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://github.com/RohitChak/Hand-Drawn-Circuit-Recognizer">Hand-Drawn-Circuit-Recognizer</a></td>
+<td>⚠️ 未测试</td>
+<td>使用 SVM 而非深度模型</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2411.14299">Auto-SPICE / Masala-CHAI</a></td>
+<td>⚠️ 未测试</td>
+<td>需要 GPT-4o API</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="总结：各方案能力矩阵"><a href="#总结：各方案能力矩阵" class="headerlink" title="总结：各方案能力矩阵"></a>总结：各方案能力矩阵</h2><table>
+<thead>
+<tr>
+<th>需求</th>
+<th>纯 OCR</th>
+<th>PDF 工具</th>
+<th>剑桥电路解析器</th>
+<th>YOLOv5</th>
+<th><strong>综合方案</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>读文字题目</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>—</td>
+<td>—</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>读 PDF 教材</td>
+<td>—</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>—</td>
+<td>—</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>导线位置</td>
+<td>—</td>
+<td>—</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>—</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>元件定位</td>
+<td>—</td>
+<td>—</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>节点检测</td>
+<td>—</td>
+<td>—</td>
+<td>⭐⭐⭐⭐</td>
+<td>—</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>拓扑图</td>
+<td>—</td>
+<td>—</td>
+<td>⭐⭐⭐⭐</td>
+<td>—</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>元件类型（印刷图）</td>
+<td>—</td>
+<td>—</td>
+<td>⭐</td>
+<td>⭐</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td>网表生成</td>
+<td>—</td>
+<td>—</td>
+<td>⭐⭐⭐</td>
+<td>—</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>SPICE 仿真</td>
+<td>—</td>
+<td>—</td>
+<td>⭐⭐⭐</td>
+<td>—</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>求解电路</strong></td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>⭐⭐</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>综合方案得分低的原因</strong>：元件类型识别是瓶颈。拓扑有了，但不知道元件是 R 还是 L 还是 C，就无法计算。</p>
+</blockquote>
+<hr>
+<h2 id="根本难题"><a href="#根本难题" class="headerlink" title="根本难题"></a>根本难题</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">          ┌─────────────┐</span><br><span class="line">图片 ──→ │ 导线/节点检测 │ ──→ 拓扑结构 ✅ (已解决)</span><br><span class="line">          └─────────────┘</span><br><span class="line">          ┌─────────────┐</span><br><span class="line">图片 ──→ │ 文字 OCR     │ ──→ 题目文字 ✅ (基本解决)</span><br><span class="line">          └─────────────┘</span><br><span class="line">          ┌─────────────┐</span><br><span class="line">图片 ──→ │ 元件类型识别  │ ──→ R? L? C? ❌ (未解决)</span><br><span class="line">          └─────────────┘</span><br></pre></td></tr></table></figure>
+
+<p><strong>导线检测</strong>和<strong>文字 OCR</strong>是相对容易的计算机视觉问题。但<strong>元件类型识别</strong>是一个细粒度分类问题，再加上电路元件符号因标准（IEEE vs IEC）、绘制风格（手绘 vs 印刷）、尺度、旋转而变化多端——目前没有针对印刷电路教材训练的开源模型。</p>
+<hr>
+<h2 id="可能的解决方案"><a href="#可能的解决方案" class="headerlink" title="可能的解决方案"></a>可能的解决方案</h2><h3 id="方案-A：人机协作（当前可行度-⭐⭐⭐⭐⭐）"><a href="#方案-A：人机协作（当前可行度-⭐⭐⭐⭐⭐）" class="headerlink" title="方案 A：人机协作（当前可行度 ⭐⭐⭐⭐⭐）"></a>方案 A：人机协作（当前可行度 ⭐⭐⭐⭐⭐）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">用户看图 → 口述拓扑 → AI 计算 → 用户验证</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>优点</strong>：100% 可靠的拓扑信息，AI 的计算能力得到充分利用</li>
+<li><strong>缺点</strong>：需要人工描述，效率受限于人的速度</li>
+<li><strong>适用场景</strong>：精确求解、验证答案、学习辅导</li>
+</ul>
+<p><strong>这是我们目前采用的方案。</strong></p>
+<h3 id="方案-B：专用模型微调（当前可行度-⭐⭐⭐⭐）"><a href="#方案-B：专用模型微调（当前可行度-⭐⭐⭐⭐）" class="headerlink" title="方案 B：专用模型微调（当前可行度 ⭐⭐⭐⭐）"></a>方案 B：专用模型微调（当前可行度 ⭐⭐⭐⭐）</h3><p>在印刷电路数据集上微调 YOLOv8：</p>
+<ul>
+<li>使用 <a target="_blank" rel="noopener" href="https://github.com/VisionMillionDataStudio/CirAI809">CirAI809</a> 的数据集（601 张图，18 类）</li>
+<li>或自行标注一批教材电路图</li>
+<li>预期可将印刷电路元件分类准确率提升到 90%+</li>
+</ul>
+<h3 id="方案-C：多模态-LLM（当前可行度-⭐⭐⭐）"><a href="#方案-C：多模态-LLM（当前可行度-⭐⭐⭐）" class="headerlink" title="方案 C：多模态 LLM（当前可行度 ⭐⭐⭐）"></a>方案 C：多模态 LLM（当前可行度 ⭐⭐⭐）</h3><p>使用 GPT-4o / GPT-4V 等视觉语言模型直接”看”电路图：</p>
+<ul>
+<li><strong>优点</strong>：理论上一步到位，不需要搭工具链</li>
+<li><strong>缺点</strong>：<ul>
+<li>需要 API 调用（费用 + 网络）</li>
+<li>拓扑幻觉（串联/并联混淆）仍然存在</li>
+<li>对复杂电路（桥式、非平面）的准确率不足</li>
+</ul>
+</li>
+<li><strong>论文证据</strong>：Auto-SPICE（2024.11）测试 GPT-4o 从电路图生成网表，器件级 F1=1.0，但功能块级 F1=0.31</li>
+</ul>
+<h3 id="方案-D：端到端电路图理解系统（当前可行度-⭐⭐）"><a href="#方案-D：端到端电路图理解系统（当前可行度-⭐⭐）" class="headerlink" title="方案 D：端到端电路图理解系统（当前可行度 ⭐⭐）"></a>方案 D：端到端电路图理解系统（当前可行度 ⭐⭐）</h3><p>综合 CircuitSchematicImageInterpreter（拓扑）+ 微调的 YOLOv8（元件分类）+ 训练好的 OCR（标注文字）→ 完整网表 → SPICE 仿真：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">图片 → [拓扑提取] → [元件分类] → [OCR 标注] → 完整 SPICE 网表 → 仿真求解</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>优点</strong>：全自动</li>
+<li><strong>缺点</strong>：开发和训练成本高，各模块的集成调试工作量大</li>
+</ul>
+<hr>
+<h2 id="本次实验的所有工具安装记录"><a href="#本次实验的所有工具安装记录" class="headerlink" title="本次实验的所有工具安装记录"></a>本次实验的所有工具安装记录</h2><p>供后续使用参考：</p>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>安装位置</th>
+<th>安装方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Python 3.12</td>
+<td><code>D:\claude\pdf\</code></td>
+<td>winget</td>
+</tr>
+<tr>
+<td>PyMuPDF (fitz)</td>
+<td>Python 包</td>
+<td>pip</td>
+</tr>
+<tr>
+<td>pytesseract</td>
+<td>Python 包</td>
+<td>pip</td>
+</tr>
+<tr>
+<td>pdf2image + Pillow</td>
+<td>Python 包</td>
+<td>pip</td>
+</tr>
+<tr>
+<td>Tesseract OCR 5.4.0</td>
+<td><code>C:\Program Files\Tesseract-OCR\</code></td>
+<td>winget</td>
+</tr>
+<tr>
+<td>中文语言包 (chi_sim)</td>
+<td><code>C:\Users\Administrator\tessdata\</code></td>
+<td>手动下载</td>
+</tr>
+<tr>
+<td>Poppler 25.07</td>
+<td><code>D:\claude\pdf reader\poppler\</code></td>
+<td>winget</td>
+</tr>
+<tr>
+<td>OpenCV + NetworkX</td>
+<td>Python 包</td>
+<td>pip</td>
+</tr>
+<tr>
+<td>PyTorch 2.12 (CPU)</td>
+<td>Python 包</td>
+<td>pip</td>
+</tr>
+<tr>
+<td>YOLOv5 + ultralytics</td>
+<td>Python 包</td>
+<td>pip</td>
+</tr>
+<tr>
+<td>CircuitSchematicImageInterpreter</td>
+<td><code>D:\claude\picture reader\</code></td>
+<td>git clone</td>
+</tr>
+<tr>
+<td>Electrical_Schema_Recognition</td>
+<td><code>D:\claude\picture reader\</code></td>
+<td>git clone</td>
+</tr>
+<tr>
+<td>scikit-image, scipy, sympy, matplotlib</td>
+<td>Python 包</td>
+<td>pip</td>
+</tr>
+</tbody></table>
+<h3 id="Claude-Code-Skills"><a href="#Claude-Code-Skills" class="headerlink" title="Claude Code Skills"></a>Claude Code Skills</h3><p>本次实验还创建了两个 Claude Code skill，供后续会话自动加载：</p>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>位置</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>pdf</code></td>
+<td><code>.claude/skills/pdf.md</code></td>
+<td>读取 PDF 文件（文字型 + 扫描型）</td>
+</tr>
+<tr>
+<td><code>circuit-analysis</code></td>
+<td><code>.claude/skills/circuit-analysis.md</code></td>
+<td>系统化电路分析（节点法、回路法、相量法、三相电路等）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><ol>
+<li><p><strong>导线和元件的空间位置</strong>可以从图片中精确提取（像素级精度）。剑桥大学的 CircuitSchematicImageInterpreter 是这方面最成熟的开源方案。</p>
+</li>
+<li><p><strong>文字题目</strong>可以通过 Tesseract OCR 提取，中文支持良好，但数学符号和下标容易出错。</p>
+</li>
+<li><p><strong>元件类型识别</strong>是当前最大的缺口。没有针对印刷电路教材训练的开源模型。YOLOv5 的预训练模型只覆盖手绘电路的 6 类元件。</p>
+</li>
+<li><p><strong>最实用的当前方案是人机协作</strong>：拓扑提取自动化 + 元件类型人工标注 + AI 计算。这样既利用了 CV 的精确空间定位能力，又避免了分类模型的不准确。</p>
+</li>
+<li><p><strong>多模态 LLM（GPT-4o 等）代表了未来的方向</strong>，但当前的拓扑推理准确率还达不到工程可靠性的要求。需要等待针对电路图的专用微调模型。</p>
+</li>
+<li><p>如果 DeepSeek 未来推出多模态能力，配合电路图专用微调数据集（如 CirAI809），可能会是第一个真正可用的中文电路图 AI 分析方案。</p>
+</li>
+</ol>
+<hr>
+<p><em>实验日期：2026-05-29 | 工具版本记录于 <code>D:\claude\picture reader\</code> 和 <code>D:\claude\pdf reader\</code></em></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://fanchanghong650-hub.github.io">Fam_RiverBird</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://fanchanghong650-hub.github.io/2026/05/29/ai-circuit-diagram-reading-experiment/">https://fanchanghong650-hub.github.io/2026/05/29/ai-circuit-diagram-reading-experiment/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://fanchanghong650-hub.github.io" target="_blank">桜ノ詩の庭</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%94%B5%E8%B7%AF%E5%88%86%E6%9E%90/">电路分析</a><a class="post-meta__tags" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/">计算机视觉</a><a class="post-meta__tags" href="/tags/OCR/">OCR</a><a class="post-meta__tags" href="/tags/YOLO/">YOLO</a><a class="post-meta__tags" href="/tags/SPICE/">SPICE</a><a class="post-meta__tags" href="/tags/%E6%8B%93%E6%89%91%E8%AF%86%E5%88%AB/">拓扑识别</a><a class="post-meta__tags" href="/tags/Claude/">Claude</a></div><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/05/29/linear-circuit-theory-matrix-method/" title="《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材</div></div><div class="info-2"><div class="info-item-1">为什么这本书值得关注如果你学过电路分析，大概率遇到过这种情况：手算节点电压时，两个方程消元还算清爽，三个方程就开始出现分数灾难，四个方程直接放弃。然后你打开 SPICE 仿真，一切交给计算机。 但有没有一种方法，既适合手算，又能自然过渡到计算机求解？ Jiri Vlach 的 Linear Circuit Theory: Matrices in Computer Applications（2014, CRC Press）给出的答案是：从一开始就用矩阵。 这本书的副标题 Matrices in Computer Applications 点明了它的核心哲学——矩阵代数不是”高级话题”，而是应该从第三章就引入的基础工具。全书 463 页，18 章，覆盖了线性电路理论的几乎所有主题，从欧姆定律一直讲到改进节点法（MNF）和傅里叶变换。  作者背景Jiri Vlach 是加拿大滑铁卢大学电气与计算机工程系的 Distinguished Professor Emeritus，IEEE Life Fellow。他与 Kishore Singhal 合著了 Computer Methods f...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/05/29/linear-circuit-theory-matrix-method/" title="《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-29</div><div class="info-item-2">《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材</div></div><div class="info-2"><div class="info-item-1">为什么这本书值得关注如果你学过电路分析，大概率遇到过这种情况：手算节点电压时，两个方程消元还算清爽，三个方程就开始出现分数灾难，四个方程直接放弃。然后你打开 SPICE 仿真，一切交给计算机。 但有没有一种方法，既适合手算，又能自然过渡到计算机求解？ Jiri Vlach 的 Linear Circuit Theory: Matrices in Computer Applications（2014, CRC Press）给出的答案是：从一开始就用矩阵。 这本书的副标题 Matrices in Computer Applications 点明了它的核心哲学——矩阵代数不是”高级话题”，而是应该从第三章就引入的基础工具。全书 463 页，18 章，覆盖了线性电路理论的几乎所有主题，从欧姆定律一直讲到改进节点法（MNF）和傅里叶变换。  作者背景Jiri Vlach 是加拿大滑铁卢大学电气与计算机工程系的 Distinguished Professor Emeritus，IEEE Life Fellow。他与 Kishore Singhal 合著了 Computer Methods f...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Fam_RiverBird</div><div class="author-info-description">记录数学思考与编程笔记 — 桜色の個人ブログ</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">17</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">88</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E7%9A%84%E8%B5%B7%E7%82%B9"><span class="toc-number">1.</span> <span class="toc-text">问题的起点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E8%AE%BE%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">实验设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E9%93%BE%E8%B7%AF-1%EF%BC%9A%E7%BA%AF-OCR-%E6%96%B9%E6%A1%88%EF%BC%88Tesseract%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">工具链路 1：纯 OCR 方案（Tesseract）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88"><span class="toc-number">3.1.</span> <span class="toc-text">做了什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">3.2.</span> <span class="toc-text">结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B9%E6%9C%AC%E9%97%AE%E9%A2%98"><span class="toc-number">3.3.</span> <span class="toc-text">根本问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E9%93%BE%E8%B7%AF-2%EF%BC%9APDF-%E7%9B%B4%E6%8E%A5%E6%B8%B2%E6%9F%93%EF%BC%88PyMuPDF-Poppler%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">工具链路 2：PDF 直接渲染（PyMuPDF + Poppler）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88-1"><span class="toc-number">4.1.</span> <span class="toc-text">做了什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E7%9A%84%E5%B7%A5%E5%85%B7"><span class="toc-number">4.2.</span> <span class="toc-text">安装的工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C-1"><span class="toc-number">4.3.</span> <span class="toc-text">结果</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E9%93%BE%E8%B7%AF-3%EF%BC%9A%E7%94%B5%E8%B7%AF%E4%B8%93%E7%94%A8%E5%9B%BE%E5%83%8F%E8%A7%A3%E9%87%8A%E5%99%A8%EF%BC%88CircuitSchematicImageInterpreter%EF%BC%89"><span class="toc-number">5.</span> <span class="toc-text">工具链路 3：电路专用图像解释器（CircuitSchematicImageInterpreter）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88-2"><span class="toc-number">5.1.</span> <span class="toc-text">做了什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">5.2.</span> <span class="toc-text">工作原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E6%B5%8B%E8%AF%95%E6%95%B0%E6%8D%AE%EF%BC%88%E4%B9%A0%E9%A2%98-1%EF%BC%89"><span class="toc-number">5.3.</span> <span class="toc-text">实际测试数据（习题 1）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E6%9E%84%E7%9A%84%E6%8B%93%E6%89%91%E5%9B%BE%EF%BC%88ASCII%EF%BC%89"><span class="toc-number">5.4.</span> <span class="toc-text">重构的拓扑图（ASCII）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%88%E6%9E%9C%E8%AF%84%E4%BC%B0"><span class="toc-number">5.5.</span> <span class="toc-text">效果评估</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E9%99%90%E5%88%B6"><span class="toc-number">5.6.</span> <span class="toc-text">关键限制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E9%93%BE%E8%B7%AF-4%EF%BC%9AYOLOv5-%E5%85%83%E4%BB%B6%E5%88%86%E7%B1%BB%EF%BC%88Electrical-Schema-Recognition%EF%BC%89"><span class="toc-number">6.</span> <span class="toc-text">工具链路 4：YOLOv5 元件分类（Electrical_Schema_Recognition）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88-3"><span class="toc-number">6.1.</span> <span class="toc-text">做了什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E4%BF%A1%E6%81%AF"><span class="toc-number">6.2.</span> <span class="toc-text">模型信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="toc-number">6.3.</span> <span class="toc-text">实际测试结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%88%E6%9E%9C%E8%AF%84%E4%BC%B0-1"><span class="toc-number">6.4.</span> <span class="toc-text">效果评估</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E9%93%BE%E8%B7%AF-5%EF%BC%9A%E5%85%B6%E4%BB%96%E6%8E%A2%E7%B4%A2%E8%BF%87%E7%9A%84%E9%A1%B9%E7%9B%AE"><span class="toc-number">7.</span> <span class="toc-text">工具链路 5：其他探索过的项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A%E5%90%84%E6%96%B9%E6%A1%88%E8%83%BD%E5%8A%9B%E7%9F%A9%E9%98%B5"><span class="toc-number">8.</span> <span class="toc-text">总结：各方案能力矩阵</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B9%E6%9C%AC%E9%9A%BE%E9%A2%98"><span class="toc-number">9.</span> <span class="toc-text">根本难题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%AF%E8%83%BD%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">10.</span> <span class="toc-text">可能的解决方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%A1%88-A%EF%BC%9A%E4%BA%BA%E6%9C%BA%E5%8D%8F%E4%BD%9C%EF%BC%88%E5%BD%93%E5%89%8D%E5%8F%AF%E8%A1%8C%E5%BA%A6-%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90%EF%BC%89"><span class="toc-number">10.1.</span> <span class="toc-text">方案 A：人机协作（当前可行度 ⭐⭐⭐⭐⭐）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%A1%88-B%EF%BC%9A%E4%B8%93%E7%94%A8%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%EF%BC%88%E5%BD%93%E5%89%8D%E5%8F%AF%E8%A1%8C%E5%BA%A6-%E2%AD%90%E2%AD%90%E2%AD%90%E2%AD%90%EF%BC%89"><span class="toc-number">10.2.</span> <span class="toc-text">方案 B：专用模型微调（当前可行度 ⭐⭐⭐⭐）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%A1%88-C%EF%BC%9A%E5%A4%9A%E6%A8%A1%E6%80%81-LLM%EF%BC%88%E5%BD%93%E5%89%8D%E5%8F%AF%E8%A1%8C%E5%BA%A6-%E2%AD%90%E2%AD%90%E2%AD%90%EF%BC%89"><span class="toc-number">10.3.</span> <span class="toc-text">方案 C：多模态 LLM（当前可行度 ⭐⭐⭐）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%A1%88-D%EF%BC%9A%E7%AB%AF%E5%88%B0%E7%AB%AF%E7%94%B5%E8%B7%AF%E5%9B%BE%E7%90%86%E8%A7%A3%E7%B3%BB%E7%BB%9F%EF%BC%88%E5%BD%93%E5%89%8D%E5%8F%AF%E8%A1%8C%E5%BA%A6-%E2%AD%90%E2%AD%90%EF%BC%89"><span class="toc-number">10.4.</span> <span class="toc-text">方案 D：端到端电路图理解系统（当前可行度 ⭐⭐）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AC%E6%AC%A1%E5%AE%9E%E9%AA%8C%E7%9A%84%E6%89%80%E6%9C%89%E5%B7%A5%E5%85%B7%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95"><span class="toc-number">11.</span> <span class="toc-text">本次实验的所有工具安装记录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Claude-Code-Skills"><span class="toc-number">11.1.</span> <span class="toc-text">Claude Code Skills</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">12.</span> <span class="toc-text">结论</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/29/ai-circuit-diagram-reading-experiment/" title="AI 阅读电路图的能力边界——一次系统化的工具链实验">AI 阅读电路图的能力边界——一次系统化的工具链实验</a><time datetime="2026-05-29T15:00:00.000Z" title="发表于 2026-05-29 23:00:00">2026-05-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/29/linear-circuit-theory-matrix-method/" title="《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材">《Linear Circuit Theory》— 一本用矩阵代数统一电路分析的教材</a><time datetime="2026-05-29T12:00:00.000Z" title="发表于 2026-05-29 20:00:00">2026-05-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/29/claude-code-deepseek-v4-guide/" title="Claude Code + DeepSeek V4 Pro 终极配置指南">Claude Code + DeepSeek V4 Pro 终极配置指南</a><time datetime="2026-05-29T11:30:00.000Z" title="发表于 2026-05-29 19:30:00">2026-05-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/29/probability-ch2-conditional-probability/" title="概率论第二章「条件概率」— 用 2/8 法则抓住整本书的灵魂">概率论第二章「条件概率」— 用 2/8 法则抓住整本书的灵魂</a><time datetime="2026-05-29T02:00:00.000Z" title="发表于 2026-05-29 10:00:00">2026-05-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/29/probability-ch3-random-variables/" title="概率论第三章「随机变量及其分布」— 用 2/8 法则理解&quot;分布的故事&quot;">概率论第三章「随机变量及其分布」— 用 2/8 法则理解&quot;分布的故事&quot;</a><time datetime="2026-05-29T01:50:00.000Z" title="发表于 2026-05-29 09:50:00">2026-05-29</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Fam_RiverBird</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/sakura-petals.js"></script><script src="/js/bg-slideshow.js"></script><script src="/js/click-solid.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"jsonPath":"/live2dw/assets/miku.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"tagMode":false});</script></body></html>
