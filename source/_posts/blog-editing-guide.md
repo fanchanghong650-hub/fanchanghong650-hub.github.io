@@ -95,12 +95,10 @@ tags: [标签1, 标签2, 标签3]     # 支持多个标签
 
 ```bash
 cd C:\blog
-git add source/_posts/你的文章文件名.md    # 添加新文章（也可以是整个目录）
+git add -A                                # 暂存所有修改；如果只想添加文章，用 git add source/_posts/你的文章.md
 git commit -m "描述你的修改"
-git push -u origin source
+git push -u origin source                 # -u 只需首次推送时使用，之后直接 git push 即可
 ```
-
-> 如果你的 GitHub 默认分支是 `master` 而非 `main`：Hexo 在部署时会自动使用 `.deploy_git` 目录里的 git，只需确保 `_config.yml` 中 `deploy.branch` 设置为你的 Pages 分支名即可。如果不确定，去 GitHub 仓库 Settings → Pages → Branch 查看当前使用的分支名。
 
 **第二步：生成并部署网站**
 
@@ -119,15 +117,19 @@ hexo clean; hexo generate; hexo deploy
 
 > 注意：使用 PowerShell 时必须用分号 `;` 分隔命令，不能用 `&&`。
 
+> **关于分支名**：`_config.yml` 中 `deploy.branch` 必须与 GitHub Pages 使用的分支一致（通常是 `main`，也可能是 `master`）。不确定的话，去 GitHub 仓库 Settings → Pages → Branch 确认。
+
 #### 快捷命令一览
 
 ```bash
 # 在 C:\blog 目录下依次执行：
-git add source/_posts/*.md
-git commit -m "发布新文章：XXX"
-git push origin source
+git add -A                              # 暂存所有修改（文章/CSS/JS/图片/配置）
+git commit -m "描述你的修改"
+git push origin source                  # 首次推送加 -u，之后不需要
 hexo clean; hexo g; hexo d
 ```
+
+> **注意**：如果你确实只想推送某一篇文章（不改其他文件），可以把 `git add -A` 换成 `git add source/_posts/你的文章.md`。
 
 #### 验证部署是否成功
 
@@ -145,6 +147,7 @@ hexo clean; hexo g; hexo d
 | 部署成功但线上没更新 | 浏览器缓存了旧页面 | 按 Ctrl+Shift+R 强制刷新 |
 | 部署成功但样式错乱 | `hexo clean` 未执行，残留旧缓存 | 先 `hexo clean` 再 `hexo g` |
 | 只执行了 `hexo d` 没推送源码 | 文章上线了，但源代码没备份 | 补执行 `git push origin source` 即可 |
+| `hexo deploy` 时出现大量 "LF will be replaced by CRLF" 警告 | Windows 下 Git 的 `core.autocrlf=true` 导致换行符转换 | 无害警告，不影响网站；可 `git config core.autocrlf false` 消除 |
 
 ### 草稿
 
@@ -389,34 +392,23 @@ hexo server --draft    # 预览草稿
 
 ---
 
-## 七、部署到 GitHub Pages
+## 七、部署到 GitHub Pages（快速参考）
 
-### 完整部署流程
+> 关于双分支策略的详细解释和排错指南，见 **一、发布文章 → 发布流程（完整版）**。本节仅为快速参考。
+
+### 一步到位命令
 
 ```bash
 cd C:\blog
 git add -A
 git commit -m "描述你的修改"
-git push -u origin source
+git push origin source               # 首次推送加 -u
 hexo clean; hexo generate; hexo deploy
 ```
 
-### 部署原理
-
-本仓库使用双分支策略：
-
-1. `source` 分支 — 存放博客源代码（Markdown、配置、JS、CSS）
-2. `main` 分支 — 存放生成的静态网站（HTML/CSS/JS/图片），由 GitHub Pages 直接服务
-
-- `git push origin source` 将源代码备份到 source 分支
-- `hexo deploy` 将生成的静态网站部署到 main 分支
 - 网站地址：`https://fanchanghong650-hub.github.io`
-
-### 线上与本地同步
-
-这个博客可以一直存在，只要 GitHub Pages 服务不停止，你的仓库不被删除。
-
-> **重要**：每次本地修改后，必须执行 `hexo clean; hexo generate; hexo deploy` 才能让线上网站更新。修改不会自动同步。
+- 部署后等待 1-2 分钟，GitHub Pages 有短暂缓存
+- 改完线上没变化：Ctrl+Shift+R 强制刷新浏览器
 
 ---
 
