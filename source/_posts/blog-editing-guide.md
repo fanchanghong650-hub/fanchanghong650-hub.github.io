@@ -34,7 +34,7 @@ C:\blog\
 
 ### 修改是否自动同步？
 
-- **本地预览** (`hexo server`)：修改 `source/` 下的文件会自动刷新。修改 `_config.yml` 或 `_config.butterfly.yml` 需要重启 `hexo server`。
+- **本地预览** (`npx hexo server`)：修改 `source/` 下的文件会自动刷新。修改 `_config.yml` 或 `_config.butterfly.yml` 需要重启 `npx hexo server`。
 - **线上网站**：本地修改后，需要执行 `hexo clean; hexo generate; hexo deploy` 才能部署到 GitHub Pages。线上不会自动同步。
 
 ---
@@ -47,7 +47,7 @@ C:\blog\
 
 ```bash
 cd C:\blog
-hexo new post "你的文章标题"
+npx hexo new post "你的文章标题"
 ```
 
 这会自动在 `source\_posts\` 下创建一个 `.md` 文件，文件名格式为 `你的文章标题.md`。
@@ -67,7 +67,7 @@ tags: [标签1, 标签2, 标签3]     # 支持多个标签
 ---
 ```
 
-`hexo new` 命令会自动生成 `title` 和 `date`，你只需要补充 `categories` 和 `tags`。
+`npx hexo new` 命令会自动生成 `title` 和 `date`，你只需要补充 `categories` 和 `tags`。
 
 ### 文章正文
 
@@ -85,7 +85,7 @@ tags: [标签1, 标签2, 标签3]     # 支持多个标签
 | `main` | 生成的静态网站（HTML/CSS/JS/图片） | 由 GitHub Pages 直接服务，面对读者 |
 
 - `git push origin source` → 将**源代码**推送到 source 分支（备份）
-- `hexo deploy` → 将**生成的网站**推送到 main 分支（上线）
+- `npx hexo deploy` → 将**生成的网站**推送到 main 分支（上线）
 
 > 两个分支是独立的，分别存放不同的内容。只做其中一个操作，网站不会更新。
 
@@ -104,15 +104,15 @@ git push -u origin source                 # -u 只需首次推送时使用，之
 
 ```bash
 cd C:\blog
-hexo clean        # 清除缓存和之前生成的 public/ 文件夹
-hexo generate     # 重新生成静态文件到 public/（可简写为 hexo g）
-hexo deploy       # 将 public/ 推送到 main 分支（可简写为 hexo d）
+npx hexo clean        # 清除缓存和之前生成的 public/ 文件夹
+npx hexo generate     # 重新生成静态文件到 public/（可简写为 npx hexo g）
+npx hexo deploy       # 将 public/ 推送到 main 分支（可简写为 npx hexo d）
 ```
 
 也可以合并为一条命令：
 
 ```bash
-hexo clean; hexo generate; hexo deploy
+npx hexo clean; npx hexo generate; npx hexo deploy
 ```
 
 > 注意：使用 PowerShell 时必须用分号 `;` 分隔命令，不能用 `&&`。
@@ -126,7 +126,7 @@ hexo clean; hexo generate; hexo deploy
 git add -A                              # 暂存所有修改（文章/CSS/JS/图片/配置）
 git commit -m "描述你的修改"
 git push origin source                  # 首次推送加 -u，之后不需要
-hexo clean; hexo g; hexo d
+npx hexo clean; npx hexo g; npx hexo d
 ```
 
 > **注意**：如果你确实只想推送某一篇文章（不改其他文件），可以把 `git add -A` 换成 `git add source/_posts/你的文章.md`。
@@ -143,24 +143,25 @@ hexo clean; hexo g; hexo d
 | 现象 | 可能原因 | 解决方法 |
 |------|---------|---------|
 | 执行 `git push` 报 "Permission denied" | SSH key 未配置或过期 | 使用 `git remote set-url origin https://github.com/你的用户名/仓库名.git` 切换为 HTTPS 方式 |
-| `hexo deploy` 报 "Repository not found" | `_config.yml` 中的 `deploy.repo` 地址有误 | 检查仓库地址是否完全正确，注意用户名大小写 |
+| `npx hexo deploy` 报 "Repository not found" | `_config.yml` 中的 `deploy.repo` 地址有误 | 检查仓库地址是否完全正确，注意用户名大小写 |
 | 部署成功但线上没更新 | 浏览器缓存了旧页面 | 按 Ctrl+Shift+R 强制刷新 |
-| 部署成功但样式错乱 | `hexo clean` 未执行，残留旧缓存 | 先 `hexo clean` 再 `hexo g` |
-| 只执行了 `hexo d` 没推送源码 | 文章上线了，但源代码没备份 | 补执行 `git push origin source` 即可 |
-| `hexo deploy` 时出现大量 "LF will be replaced by CRLF" 警告 | Windows 下 Git 的 `core.autocrlf=true` 导致换行符转换 | 无害警告，不影响网站；可 `git config core.autocrlf false` 消除 |
+| 部署成功但样式错乱 | `npx hexo clean` 未执行，残留旧缓存 | 先 `npx hexo clean` 再 `npx hexo g` |
+| 只执行了 `npx hexo d` 没推送源码 | 文章上线了，但源代码没备份 | 补执行 `git push origin source` 即可 |
+| `npx hexo deploy` 时出现大量 "LF will be replaced by CRLF" 警告 | Windows 下 Git 的 `core.autocrlf=true` 导致换行符转换 | 无害警告，不影响网站；可 `git config core.autocrlf false` 消除 |
+| PowerShell 提示"无法将 hexo 识别为..." | `hexo` 未全局安装，PowerShell 找不到本地 npm 包的命令 | 使用 **`npx hexo`** 代替 `hexo`。`npx` 随 Node.js 一起安装，会自动找到 `node_modules/.bin/` 下的命令 |
 
 ### 草稿
 
 如果文章还没写完，可以创建为草稿：
 
 ```bash
-hexo new draft "草稿标题"
+npx hexo new draft "草稿标题"
 ```
 
 草稿保存在 `source\_drafts\`，不会发布。完成后用以下命令发布：
 
 ```bash
-hexo publish draft "草稿标题"
+npx hexo publish draft "草稿标题"
 ```
 
 ---
@@ -203,7 +204,7 @@ var images = [
 
 4. 图片数量没有限制，轮播脚本会自动适应
 5. 如果要调整切换间隔，修改 `bgInterval` 的值（单位毫秒，当前 3500 = 3.5秒）
-6. 重新部署：`hexo clean; hexo generate; hexo deploy`
+6. 重新部署：`npx hexo clean; npx hexo generate; npx hexo deploy`
 
 ### 添加更多或更少背景图
 
@@ -376,18 +377,18 @@ menu:
 
 ```bash
 cd C:\blog
-hexo server
+npx hexo server
 ```
 
 然后在浏览器打开 `http://localhost:4000`。
 
 - 修改 `source/` 下的文件会自动刷新
-- 修改 `_config.yml` 或 `_config.butterfly.yml` 后需要重启 `hexo server`（按 Ctrl+C 停止，再重新运行）
+- 修改 `_config.yml` 或 `_config.butterfly.yml` 后需要重启 `npx hexo server`（按 Ctrl+C 停止，再重新运行）
 
 常用预览命令：
 ```bash
-hexo server -p 5000    # 使用 5000 端口
-hexo server --draft    # 预览草稿
+npx hexo server -p 5000    # 使用 5000 端口
+npx hexo server --draft    # 预览草稿
 ```
 
 ---
@@ -403,7 +404,7 @@ cd C:\blog
 git add -A
 git commit -m "描述你的修改"
 git push origin source               # 首次推送加 -u
-hexo clean; hexo generate; hexo deploy
+npx hexo clean; npx hexo generate; npx hexo deploy
 ```
 
 - 网站地址：`https://fanchanghong650-hub.github.io`
@@ -429,13 +430,13 @@ hexo clean; hexo generate; hexo deploy
 | 调整面板透明度 | `source\css\custom.css` | 是 |
 | 更改 favicon | `_config.butterfly.yml` → favicon | 是 |
 
-> 所有需要部署的操作，都执行：`hexo clean; hexo generate; hexo deploy`
+> 所有需要部署的操作，都执行：`npx hexo clean; npx hexo generate; npx hexo deploy`
 
 ---
 
 ## 九、常见问题
 
-### Q: hexo deploy 失败，提示 "Repository not found"
+### Q: npx hexo deploy 失败，提示 "Repository not found"
 A: 检查 `_config.yml` 中 `deploy.repo` 是否与你的 GitHub 仓库地址完全一致。
 
 ### Q: 修改了 CSS/JS 但线上没变化
