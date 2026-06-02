@@ -48,8 +48,8 @@ body.page-home {
 /* ===== NAV — transparent on all pages ===== */
 #nav {
   background: rgba(255,245,245,0.55) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border-bottom: 1px solid rgba(242,167,181,0.15);
 }
 [data-theme="dark"] #nav { background: rgba(30,14,14,0.7) !important; }
@@ -86,8 +86,8 @@ body.page-post #article-container,
 body.page-category #page,
 body.page-tag #page {
   background: var(--panel-transparent) !important;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   border-radius: 10px !important;
   border: 1px solid rgba(255,255,255,0.25) !important;
   transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -102,8 +102,8 @@ body.page-post #article-container.solid,
 body.page-category #page.solid,
 body.page-tag #page.solid {
   background: var(--panel-solid) !important;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   border: 1px solid rgba(242,167,181,0.35) !important;
   box-shadow: 0 4px 24px rgba(232,138,154,0.25) !important;
   cursor: default;
@@ -138,8 +138,8 @@ body.page-post #aside-content .card-widget,
 body.page-category #aside-content .card-widget,
 body.page-tag #aside-content .card-widget {
   background: var(--panel-transparent) !important;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   border-radius: 8px !important;
   border: 1px solid rgba(255,255,255,0.25) !important;
   transition: all 0.4s ease !important;
@@ -217,7 +217,7 @@ div.highlight, figure.highlight {
 body.page-home #footer { display: none !important; }
 body:not(.page-home) #footer {
   background: rgba(255,245,245,0.5) !important;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(4px);
   border-top: 1px solid rgba(242,167,181,0.15);
   color: #C4959D !important;
 }
