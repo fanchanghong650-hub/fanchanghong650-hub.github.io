@@ -14,7 +14,7 @@
   if (!isPost && !isArchive && !isCategory && !isTag) return;
 
   var bgIndex = 0;
-  var bgInterval = 3500; // ms per image
+  var bgInterval = 15000; // ms per image (降低频率以减轻 GPU 合成压力)
 
   var images = [
     '/images/bg/sakura_ai_wallpaper_pc_01.png',
