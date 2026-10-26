@@ -36,9 +36,14 @@ body.page-home #page-header {
 }
 body.page-home #site-title,
 body.page-home #site-subtitle {
-  color: #fff !important;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.5), 0 0 40px rgba(242,167,181,0.3);
+  color: #6E3242 !important;
+  text-shadow: 0 2px 18px rgba(255,255,255,0.75), 0 0 40px rgba(255,255,255,0.35);
   font-size: 2.5rem;
+}
+[data-theme="dark"] body.page-home #site-title,
+[data-theme="dark"] body.page-home #site-subtitle {
+  color: #fff !important;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.6), 0 0 40px rgba(242,167,181,0.3);
 }
 body.page-home {
   background: linear-gradient(170deg, #FDE0E8 0%, #FAD1DB 25%, #F8C4D0 50%, #E8B8C8 75%, #FDE0E8 100%) !important;
