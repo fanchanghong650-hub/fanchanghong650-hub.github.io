@@ -1067,7 +1067,7 @@ inject:
     - <script src="/js/body-class.js"></script>
   bottom:
     - <script src="/js/sakura-petals.js"></script>
-    - <script src="/js/bg-slideshow.js"></script>
+    - <script src="/js/bg.js"></script>
     - <script src="/js/click-solid.js"></script>
 
 # CDN Settings

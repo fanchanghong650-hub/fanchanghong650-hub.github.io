@@ -53,7 +53,7 @@ MathJax 已全局开启，行内 `$...$`、行间 `$$...$$` 直接用。**不要
 
 这样网站上 100% 正确；在 Obsidian 里这张图会显示不出来（Obsidian 把 `/` 当 vault 根），这是正常现象，不影响发布。
 
-`source/images/bg/` 里是首页轮播壁纸（约 22MB），别误删。
+`source/images/bg/` 里原本有 22MB 的首页轮播壁纸（8 张樱之诗 CG 截图 + 1 张 AI 壁纸），**2026-10-26 因版权原因已全部移除**，本地备份在 `~/Pictures/樱之诗CG/`。现在背景由 `source/js/bg.js` 的纯 CSS 渐变提供；想换回图片就把自有版权的图放进 `source/images/bg/` 并填 `bg.js` 顶部的 `PHOTO_URLS`。
 
 ## 本地预览
 
