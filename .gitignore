@@ -6,3 +6,7 @@ picture/
 错误示例/
 Vscode/
 VS Code.lnk
+
+# Obsidian 临时文件，不属于博客
+*.base
+.obsidian/
