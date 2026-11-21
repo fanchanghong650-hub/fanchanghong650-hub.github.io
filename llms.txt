@@ -1,0 +1,34 @@
+# Shirone
+
+> A Material 3 anime blog
+
+This is the llms.txt file for Shirone. It provides a machine-readable directory of published articles and core pages for Large Language Models.
+
+## Core Pages
+- [Home](https://fanchanghong650-hub.github.io/): Main blog entrance and latest post stream.
+- [About](https://fanchanghong650-hub.github.io/about/): Author profile, technical stack, and background.
+- [Archive](https://fanchanghong650-hub.github.io/archive/): Chronological index of all published writings.
+
+## Articles
+- [Shirone Authoring & Usage Guide](https://fanchanghong650-hub.github.io/posts/guide/): A comprehensive guide to post authoring, frontmatter schema, Markdown extensions, encryption, and media in Shirone.
+- [Shirone Markdown Enhancements](https://fanchanghong650-hub.github.io/posts/markdown-enhancements/): Explore Shirone's custom Markdown extensions, expressive components, and authoring syntax.
+- [Audio Reader: Japanese Anime Mystery Voices](https://fanchanghong650-hub.github.io/posts/audio-reader/): A small collection of mysterious Japanese anime voice fragments, played on demand with Audio Reader.
+- [Markdown Collapse Panels](https://fanchanghong650-hub.github.io/posts/collapse-panels/): Group optional Markdown content into compact, accessible M3E disclosure panels.
+- [Markdown Abbreviations](https://fanchanghong650-hub.github.io/posts/markdown-abbreviations/): Define common acronyms once and keep their full meaning available in normal article text.
+- [Markdown File Includes](https://fanchanghong650-hub.github.io/posts/markdown-includes/): Build-time Markdown file and slice includes.
+- [Markdown Marker Highlights](https://fanchanghong650-hub.github.io/posts/marker-highlights/): Highlight key phrases with token-driven marker syntax in Shirone Markdown.
+- [Markdown Option Groups](https://fanchanghong650-hub.github.io/posts/option-groups/): Present related Markdown alternatives in compact, synchronized M3E option groups.
+- [Markdown Spoilers](https://fanchanghong650-hub.github.io/posts/spoilers/): Hide inline answers while keeping spoiler content accessible in Shirone Markdown.
+- [Markdown Admonitions](https://fanchanghong650-hub.github.io/posts/admonitions/): Present notes, warnings, and optional details with Shirone's M3E Markdown containers.
+- [Content Annotations](https://fanchanghong650-hub.github.io/posts/content-annotations/): Add compact, accessible supporting notes to Shirone articles without interrupting the reading flow.
+- [Markdown Steps](https://fanchanghong650-hub.github.io/posts/steps/): Present sequential instructions as a compact, accessible step flow in Shirone.
+- [MDX Integration and M3E Atomic Components](https://fanchanghong650-hub.github.io/posts/mdx-showcase/): A comprehensive guide to composing rich interactive articles in Shirone using MDX, Svelte 5 interactive islands, and Material 3 Expressive design tokens.
+- [Image Gallery Grid: Syntax and Complete Examples](https://fanchanghong650-hub.github.io/posts/image-grid-demo/): A complete guide to image gallery grid syntax, parameters, cropping, responsive behavior, captions, and lightbox navigation.
+- [Mermaid Diagram Gallery](https://fanchanghong650-hub.github.io/posts/markdown-mermaid/): A gallery of Mermaid diagrams for processes, interactions, data models, schedules, and project history.
+- [Markdown Extended Features](https://fanchanghong650-hub.github.io/posts/markdown-extended/): Read more about Markdown features in Fuwari
+- [Expressive Code Example](https://fanchanghong650-hub.github.io/posts/expressive-code/): How code blocks look in Markdown using Expressive Code.
+- [Markdown Example](https://fanchanghong650-hub.github.io/posts/markdown/): A simple example of a Markdown blog post.
+- [Include Video in the Posts](https://fanchanghong650-hub.github.io/posts/video/): This post demonstrates how to include embedded video in a blog post.
+
+## Full Text Dump
+- [Full Text Archive](https://fanchanghong650-hub.github.io/llms-full.txt): Complete, concatenated Markdown content of all public articles for full-context ingestion.

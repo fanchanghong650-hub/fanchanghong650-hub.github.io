@@ -1,0 +1,2178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh_CN">
+  <title>Shirone</title>
+  <subtitle>A Material 3 anime blog</subtitle>
+  <link href="https://fanchanghong650-hub.github.io/" rel="alternate" type="text/html"/>
+  <link href="https://fanchanghong650-hub.github.io/atom.xml" rel="self" type="application/atom+xml"/>
+  <id>https://fanchanghong650-hub.github.io/</id>
+  <updated>2026-08-29T00:00:00.000Z</updated>
+  <entry>
+    <title>Shirone Authoring &amp; Usage Guide</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/guide/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/guide/</id>
+    <published>2026-08-26T00:00:00.000Z</published>
+    <updated>2026-08-26T00:00:00.000Z</updated>
+    <summary>A comprehensive guide to post authoring, frontmatter schema, Markdown extensions, encryption, and media in Shirone.</summary>
+    <content type="html"><![CDATA[<p>Welcome to <strong>Shirone</strong> (白音) — an expressive, anime-inspired blog theme crafted around <strong>Astro 7</strong>, <strong>Svelte 5</strong>, and the <strong>Material 3 Expressive (M3E)</strong> design system.</p>
+<p>This guide walks you through post creation, frontmatter specifications, directory structure, and the full suite of built-in Markdown and MDX extensions.</p>
+<p>:::tip
+Shirone renders content server-side first (SSR-first). When navigating within the site, Swup seamlessly swaps the main container while preserving the outer application shell and continuous music playback.
+:::</p>
+<hr />
+<h2>1. Creating a New Post</h2>
+<p>You can quickly scaffold a new post with standard frontmatter using the built-in CLI command:</p>
+<pre><code># Create a single-file post
+pnpm new-post my-first-post
+
+# Or create a post in a sub-directory
+pnpm new-post guides/getting-started
+</code></pre>
+<p>The newly created file will be placed in <code>src/content/posts/</code>.</p>
+<hr />
+<h2>2. Frontmatter Specification</h2>
+<p>Every Markdown (<code>.md</code>) or MDX (<code>.mdx</code>) post starts with a YAML frontmatter block defining its metadata.</p>
+<h3>Example</h3>
+<pre><code>---
+title: "Exploring Material 3 Expressive Design"
+published: 2026-08-26
+updated: 2026-08-27
+publishedAt: 2026-08-26T10:00:00+08:00
+updatedAt: 2026-08-27T09:30:00+08:00
+pinned: true
+description: "A deep dive into dynamic HCT color science and fluid transitions in Shirone."
+image: "./cover.webp"
+tags: [M3E, Design, Frontend]
+category: Guides
+draft: false
+comment: true
+---
+</code></pre>
+<h3>Supported Frontmatter Fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title</code></td>
+<td><code>string</code></td>
+<td><strong>Yes</strong></td>
+<td>The main title of the post.</td>
+</tr>
+<tr>
+<td><code>published</code></td>
+<td><code>Date</code></td>
+<td><strong>Yes</strong></td>
+<td>Publication date in <code>YYYY-MM-DD</code> format.</td>
+</tr>
+<tr>
+<td><code>publishedAt</code></td>
+<td><code>Date</code></td>
+<td>No</td>
+<td>Precise publication instant used to order posts published on the same day. It must fall on <code>published</code> in the configured site time zone.</td>
+</tr>
+<tr>
+<td><code>updated</code></td>
+<td><code>Date</code></td>
+<td>No</td>
+<td>Last updated date. When provided, an update notice badge is displayed.</td>
+</tr>
+<tr>
+<td><code>updatedAt</code></td>
+<td><code>Date</code></td>
+<td>No</td>
+<td>Precise update instant used by feeds and machine-readable metadata. It must be paired with <code>updated</code>.</td>
+</tr>
+<tr>
+<td><code>pinned</code></td>
+<td><code>boolean</code></td>
+<td>No</td>
+<td>Pin the post to the top of article lists (default: <code>false</code>).</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Post summary displayed in article cards, search results, and OpenGraph metadata.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Cover image path. Supports relative (<code>./cover.webp</code>), public (<code>/images/cover.jpg</code>), or remote URLs.</td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td><code>string[]</code></td>
+<td>No</td>
+<td>Array of tag names for taxonomy filtering and tag clouds.</td>
+</tr>
+<tr>
+<td><code>category</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Primary category name for taxonomy indexing.</td>
+</tr>
+<tr>
+<td><code>draft</code></td>
+<td><code>boolean</code></td>
+<td>No</td>
+<td>Mark as draft. Draft posts are hidden during production build (<code>pnpm build</code>).</td>
+</tr>
+<tr>
+<td><code>comment</code></td>
+<td><code>boolean</code></td>
+<td>No</td>
+<td>Toggle comment section for this specific post (default: <code>true</code>).</td>
+</tr>
+<tr>
+<td><code>lang</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Language code (e.g. <code>en</code>, <code>zh_CN</code>, <code>ja</code>) if different from site default.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. Post Encryption</h2>
+<p>Shirone provides client-side post encryption. This is a static password gate, not server-side access control: the encrypted payload and asset URLs remain publicly downloadable, so do not use it for genuinely confidential files or regulated secrets. For private journals or restricted articles, specify a password in frontmatter:</p>
+<pre><code>---
+title: "Private Research Notes"
+published: 2026-08-26
+encrypted: true
+password: "your-secret-passphrase"
+passwordHint: "Favorite anime character"
+hideHomeContent: true
+---
+</code></pre>
+<ul>
+<li><code>encrypted</code>: Set to <code>true</code> to enable encryption;</li>
+<li><code>password</code>: Passphrase string or number required to unlock the post;</li>
+<li><code>passwordHint</code>: Optional hint shown above the password entry form;</li>
+<li><code>hideHomeContent</code>: Hide word counts and content previews on the homepage to prevent data leakage.</li>
+</ul>
+<hr />
+<h2>4. Organizing Post Files</h2>
+<p>Shirone supports both folder-based co-location and single-file layouts:</p>
+<h3>Folder Structure (Recommended for Local Assets)</h3>
+<p>Co-locating your post and its media makes asset management straightforward:</p>
+<pre><code>src/content/posts/
+├── my-great-post/
+│   ├── index.md           &lt;-- Post content
+│   ├── cover.webp         &lt;-- Cover image (image: "./cover.webp")
+│   └── diagram.png        &lt;-- Inline illustration referenced in markdown
+</code></pre>
+<h3>Single-File Structure (Lightweight Prose)</h3>
+<pre><code>src/content/posts/
+├── hello-world.md
+└── quick-thoughts.md
+</code></pre>
+<hr />
+<h2>5. Rich Markdown &amp; MDX Extensions</h2>
+<p>Shirone includes modern Markdown extensions out of the box:</p>
+<h3>5.1 Admonitions</h3>
+<p>Use container directives for notes, tips, warnings, and alerts:</p>
+<pre><code>:::tip
+Use admonition containers to highlight key takeaways or best practices.
+:::
+
+:::warning
+Use warning containers to signal potential pitfalls or breaking changes.
+:::
+</code></pre>
+<h3>5.2 GitHub Repository Cards</h3>
+<p>Embed live, beautifully styled GitHub repository cards using the directive syntax:</p>
+<pre><code>::github{repo="LyraVoid/Shirone"}
+</code></pre>
+<p>::github{repo="LyraVoid/Shirone"}</p>
+<h3>5.3 Expressive Code Blocks</h3>
+<p>Enhanced code blocks feature syntax highlighting, file name badges, line numbers, and selective line highlighting:</p>
+<pre><code>// Dynamic HCT color token derivation
+import { argbFromHex, themeFromSourceColor } from "@material/material-color-utilities";
+
+const theme = themeFromSourceColor(argbFromHex("#f472b6"));
+console.log("Primary color token:", theme.schemes.light.primary);
+</code></pre>
+<h3>5.4 Mathematical Typesetting (KaTeX)</h3>
+<p>Render elegant LaTeX mathematical notation directly in Markdown:</p>
+<ul>
+<li><strong>Inline math</strong>: $E = mc^2$ or Euler's formula $e^{i\pi} + 1 = 0$.</li>
+<li><strong>Block math</strong>:</li>
+</ul>
+<p>$$
+\int_{-\infty}^{\infty} e^{-x^2} , dx = \sqrt{\pi}
+$$</p>
+<h3>5.5 Mermaid Diagrams</h3>
+<p>Create flowcharts, sequence diagrams, and architecture maps using plain text:</p>
+<pre><code>sequenceDiagram
+    autonumber
+    actor Visitor as Visitor
+    participant Page as Shirone Page
+    participant Swup as Swup Container
+    participant Audio as Persistent Shell
+
+    Visitor-&gt;&gt;Page: Click Navigation Link
+    Page-&gt;&gt;Swup: Trigger Seamless Transition
+    Swup-&gt;&gt;Page: Replace #swup-container
+    Note over Audio: Background music plays continuously
+    Page--&gt;&gt;Visitor: New Page Rendered
+</code></pre>
+<h3>5.6 Image Galleries &amp; Fancybox Lightbox</h3>
+<p>Images automatically integrate with Fancybox for lossless zoom, pan gestures, and full-screen preview:</p>
+<pre><code>![Cover preview](./cover.jpeg)
+</code></pre>
+<hr />
+<h2>6. Next Steps &amp; Customization</h2>
+<ul>
+<li><strong>Site Configuration</strong>: Learn about global settings in <code>src/config/siteConfig.ts</code> and <a href="https://github.com/LyraVoid/Shirone/blob/main/src/config/README.md"><code>src/config/README.md</code></a>.</li>
+<li><strong>Design Tokens</strong>: Explore tokens and color palettes in <code>DESIGN.md</code> and <code>docs/m3e-standard.md</code>.</li>
+<li><strong>Feedback &amp; Community</strong>: Share your ideas and questions on <a href="https://github.com/LyraVoid/Shirone/issues">GitHub Issues</a>.</li>
+</ul>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>🔒 Password Protection and Post Encryption Demo</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/encrypted-demo/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/encrypted-demo/</id>
+    <published>2026-08-20T00:00:00.000Z</published>
+    <updated>2026-08-20T00:00:00.000Z</updated>
+    <summary>该文章内容已加密，请输入密码后查看。</summary>
+    <content type="html"><![CDATA[<p><em>🔒 本文已加密保护，请访问博客网站输入密码阅读全文。</em></p>]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Examples"/>
+  </entry>
+  <entry>
+    <title>Shirone Markdown Enhancements</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/markdown-enhancements/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/markdown-enhancements/</id>
+    <published>2026-08-19T00:00:00.000Z</published>
+    <updated>2026-08-19T00:00:00.000Z</updated>
+    <summary>Explore Shirone&apos;s custom Markdown extensions, expressive components, and authoring syntax.</summary>
+    <content type="html"><![CDATA[<p>Shirone provides a collection of theme-exclusive Markdown extensions and custom syntax containers. Built on top of our native unified AST processing pipeline, all extensions render into accessible, semantic HTML during site build time with <strong>zero client JavaScript hydration overhead</strong> and <strong>100% M3E design token alignment</strong>.</p>
+<h2>File Trees</h2>
+<p>File Trees turn multi-level project structures, source hierarchies, and terminal directory outputs into compact, interactive tree views with automatic extension icons, diff highlighting, and collapsible branches.</p>
+<h3>1. Nested List Syntax (<code>:::file-tree</code>)</h3>
+<p>Use the <code>:::file-tree</code> block directive when writing the file hierarchy directly as a Markdown nested list.</p>
+<pre><code>:::file-tree{title="Shirone source tree"}
+- src
+  - components/
+    - ++ Navigation.svelte # added component
+    - -- Button.astro # removed component
+  - content
+    - posts/
+      - markdown-enhancements.md
+  - layouts/
+    - PostLayout.astro
+  - plugins
+    - markdown/
+      - rehype-file-tree.mjs
+  - styles
+    - markdown/
+      - trees.css
+  - **content.config.ts** # important file
+- public/
+  - favicon.svg
+- package.json
+:::
+</code></pre>
+<p>:::file-tree{title="Shirone source tree"}</p>
+<ul>
+<li>src
+<ul>
+<li>components/
+<ul>
+<li>++ Navigation.svelte # added component</li>
+<li>-- Button.astro # removed component</li>
+</ul>
+</li>
+<li>content
+<ul>
+<li>posts/
+<ul>
+<li>markdown-enhancements.md</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>layouts/
+<ul>
+<li>PostLayout.astro</li>
+</ul>
+</li>
+<li>plugins
+<ul>
+<li>markdown/
+<ul>
+<li>rehype-file-tree.mjs</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>styles
+<ul>
+<li>markdown/
+<ul>
+<li>trees.css</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>content.config.ts</strong> # important file</li>
+</ul>
+</li>
+<li>public/
+<ul>
+<li>favicon.svg</li>
+</ul>
+</li>
+<li>package.json
+:::</li>
+</ul>
+<h4>Authoring Rules &amp; Markers</h4>
+<ul>
+<li><strong>Diff States</strong>: Prefix an item with <code>++</code> (green background &amp; badge) or <code>--</code> (red background &amp; strikethrough) to highlight changes.</li>
+<li><strong>Comments</strong>: Any text following a <code>#</code> is rendered as a muted, right-aligned inline comment.</li>
+<li><strong>Emphasis</strong>: Wrap names in <code>**bold**</code> to give key files prominent visual weight.</li>
+<li><strong>Collapsible Folders</strong>: Directories inferred from nested list items start expanded by default. Add a trailing slash (e.g. <code>components/</code>) to create a collapsed directory that readers can expand on click or via keyboard navigation.</li>
+</ul>
+<hr />
+<h3>2. Terminal Output Syntax (<code>```file-tree</code>)</h3>
+<p>When you already have directory tree text generated from command-line tools like <code>tree</code>, paste it directly into a <code>file-tree</code> fenced code block. Both Unicode branch characters (<code>├──</code>, <code>└──</code>, <code>│</code>) and ASCII branches are automatically parsed.</p>
+<pre><code>```file-tree title="Build output" icon="simple"
+dist
+├── _astro/
+│   ├── index.css
+│   └── page.js
+└── favicon.ico
+```
+</code></pre>
+<pre><code>dist
+├── _astro/
+│   ├── index.css
+│   └── page.js
+└── favicon.ico
+</code></pre>
+<h4>Configuration Options</h4>
+<ul>
+<li><code>title="string"</code>: Sets a custom header title and accessible label for the tree.</li>
+<li><code>icon="colored" | "simple"</code>: Choose between multi-color extension icons (<code>colored</code>, default) or minimal monochrome icons (<code>simple</code>).</li>
+</ul>
+<hr />
+<h2>Code Trees</h2>
+<p>Interactive Code Trees pair a multi-level file hierarchy navigation pane on the left with instant code panel switching on the right. They provide an IDE-like reading experience for multi-file examples, modules, or whole directory walk-throughs.</p>
+<h3>1. Container Syntax (<code>:::code-tree</code>)</h3>
+<p>Combine multiple fenced code blocks within a <code>:::code-tree</code> block directive. Each code block specifies its path via <code>title="path/to/file"</code>.</p>
+<pre><code>:::code-tree{title="Shirone Component Demo" height="380px" entry="src/Button.svelte"}
+```svelte title="src/Button.svelte"
+&lt;script lang="ts"&gt;
+  let { label = "Click me" } = $props();
+&lt;/script&gt;
+
+&lt;button class="m3-btn"&gt;{label}&lt;/button&gt;
+```
+
+```stylus title="src/styles/button.styl"
+.m3-btn
+  background: var(--primary)
+  color: var(--on-primary)
+  border-radius: var(--shape-corner-m)
+```
+
+```json title="package.json"
+{
+  "name": "button-demo",
+  "version": "1.0.0"
+}
+```
+:::
+</code></pre>
+<p>:::code-tree{title="Shirone Component Demo" height="380px" entry="src/Button.svelte"}</p>
+<pre><code>&lt;script lang="ts"&gt;
+  let { label = "Click me" } = $props();
+&lt;/script&gt;
+
+&lt;button class="m3-btn"&gt;{label}&lt;/button&gt;
+</code></pre>
+<pre><code>.m3-btn
+  background: var(--primary)
+  color: var(--on-primary)
+  border-radius: var(--shape-corner-m)
+</code></pre>
+<pre><code>{
+  "name": "button-demo",
+  "version": "1.0.0"
+}
+</code></pre>
+<p>:::</p>
+<h4>Configuration &amp; Markers</h4>
+<ul>
+<li><code>title="string"</code>: Sets the header title and accessible label for the code tree.</li>
+<li><code>height="string"</code>: Sets the height for the desktop view (default <code>420px</code>, e.g. <code>380px</code>, <code>26rem</code>).</li>
+<li><code>entry="filepath"</code>: Specifies which file is active upon first load.</li>
+<li><code>icon="colored" | "simple"</code>: Switch between colorful or minimal monochrome file icons.</li>
+<li><code>:active</code>: Place <code>:active</code> on any fenced code block to designate it as the default active tab.</li>
+</ul>
+<hr />
+<h3>2. Local Directory Auto-Import (<code>@[code-tree]</code>)</h3>
+<p>Point directly to any local directory path in the workspace to automatically scan and generate an interactive code tree at build time without manually copying file contents.</p>
+<pre><code>@[code-tree title="Anime Utilities" entry="status.ts"](/src/utils/anime)
+</code></pre>
+<p>@<a href="/src/config">code-tree title="Site Configuration" entry="siteConfig.ts"</a></p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>Audio Reader: Japanese Anime Mystery Voices</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/audio-reader/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/audio-reader/</id>
+    <published>2026-08-29T00:00:00.000Z</published>
+    <updated>2026-08-29T00:00:00.000Z</updated>
+    <summary>A small collection of mysterious Japanese anime voice fragments, played on demand with Audio Reader.</summary>
+    <content type="html"><![CDATA[<p>These short Japanese voice fragments feel as though they were picked up from the edge of an anime scene: a teasing call, a bright greeting, a tiny laugh, and a few lines with no clear origin. They are mood samples rather than dialogue transcripts, so let the sound carry the meaning.</p>
+<p>Audio Reader keeps them quiet until you choose to listen. Each speaker button loads and plays its clip only after it is pressed.</p>
+<pre><code>:audio-reader[Clip title]{src="/assets/audio/filename.wav"}
+</code></pre>
+<h2>The fragments</h2>
+<ul>
+<li><strong>Baka</strong>: :audio-reader[バカ]{src="/assets/audio/Baka.wav"}</li>
+<li><strong>Ciallo</strong>: :audio-reader[Ciallo！！]{src="/assets/audio/Ciallo.wav"}</li>
+<li><strong>Ehe</strong>: :audio-reader[A joking sense]{src="/assets/audio/Ehe.wav"}</li>
+<li><strong>Imoi</strong>: :audio-reader[イモい]{src="/assets/audio/Imoi.wav"}</li>
+<li><strong>Zako</strong>: :audio-reader[雑魚じゃん、雑魚雑魚]{src="/assets/audio/Zako.wav"}</li>
+</ul>
+<p><code>src</code> must use a site-root path or an HTTPS URL, and the directive label cannot be empty. Invalid or incomplete directives remain ordinary Markdown and do not load Audio Reader resources.</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Examples"/>
+  </entry>
+  <entry>
+    <title>Markdown Collapse Panels</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/collapse-panels/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/collapse-panels/</id>
+    <published>2026-08-28T00:00:00.000Z</published>
+    <updated>2026-08-28T00:00:00.000Z</updated>
+    <summary>Group optional Markdown content into compact, accessible M3E disclosure panels.</summary>
+    <content type="html"><![CDATA[<p>Collapse panels keep related optional details in one compact group. Titles and bodies retain inline and block Markdown, while native disclosure semantics make every panel usable without client JavaScript.</p>
+<h2>Independent panels</h2>
+<p>Items open independently by default. Prefix a title with <code>:+</code> to open that item initially or <code>:-</code> to keep it closed when the group uses <code>expand</code>.</p>
+<p>::: collapse</p>
+<ul>
+<li>
+<p><strong>Package requirements</strong></p>
+<p>Use Node.js 26.13.0 or newer and enable Corepack before installing packages.</p>
+</li>
+<li>
+<p>:+ Install dependencies</p>
+<p>Run the workspace package command from the repository root.</p>
+<pre><code>pnpm.cmd install
+</code></pre>
+</li>
+<li>
+<p>Validation commands</p>
+<p>Check the content pipeline before building the production output.</p>
+<ul>
+<li><code>pnpm.cmd check:manifest</code></li>
+<li><code>npx.cmd astro check</code>
+:::</li>
+</ul>
+</li>
+</ul>
+<h2>Accordion mode</h2>
+<p>Add <code>accordion</code> when only one answer should remain open. The browser groups the native disclosures directly, so opening another item closes the previous one without hydration.</p>
+<p>::: collapse accordion expand</p>
+<ul>
+<li>
+<p>What does <code>expand</code> do here?</p>
+<p>It opens the first item initially when no item has a <code>:+</code> marker.</p>
+</li>
+<li>
+<p>Can a title contain Markdown?</p>
+<p>Yes. Titles support inline <strong>emphasis</strong> and <code>code</code>, while panel bodies support full block Markdown.</p>
+</li>
+<li>
+<p>What happens on a narrow screen?</p>
+<p>Content padding becomes compact, long text wraps, and embedded code keeps its own horizontal scrolling area.
+:::</p>
+</li>
+</ul>
+<h2>Author syntax</h2>
+<pre><code>::: collapse accordion
+- :+ First title
+
+  First panel content.
+
+- Second title with `code`
+
+  Second panel content.
+:::
+</code></pre>
+<p>The container must contain exactly one top-level unordered list. Every item needs a title paragraph, a blank line, and body content. Invalid or mixed input remains an ordinary readable Markdown list.</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>Markdown Abbreviations</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/markdown-abbreviations/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/markdown-abbreviations/</id>
+    <published>2026-08-28T00:00:00.000Z</published>
+    <updated>2026-08-28T00:00:00.000Z</updated>
+    <summary>Define common acronyms once and keep their full meaning available in normal article text.</summary>
+    <content type="html"><![CDATA[<p>Abbreviations keep technical writing compact while preserving the full term for readers who need it. A defined term renders as a native <code>abbr</code> element with its meaning available on hover and to assistive technology.</p>
+<h2>In context</h2>
+<p>SSR-first output keeps the initial document visible before JavaScript runs. When measuring its reading experience, LCP and CLS reveal whether the first visible content is fast and stable.</p>
+<p>An abbreviation can also appear next to ordinary Markdown such as <strong>SSR</strong> guidance, but literal code such as <code>SSR</code> and links like <a href="https://web.dev/articles/lcp">LCP documentation</a> remain untouched.</p>
+<h2>Define terms</h2>
+<p>Place definitions anywhere in the same Markdown document. They do not render as visible paragraphs, and only matching terms in that article receive the semantic abbreviation treatment.</p>
+<pre><code>*[SSR]: Server-Side Rendering
+*[LCP]: Largest Contentful Paint
+*[CLS]: Cumulative Layout Shift
+
+SSR makes an HTML response available before client code runs.
+</code></pre>
+<p>*[SSR]: Server-Side Rendering
+*[LCP]: Largest Contentful Paint
+*[CLS]: Cumulative Layout Shift</p>
+<h2>Authoring boundaries</h2>
+<p>Terms must begin with a letter or number and may contain letters, numbers, periods, underscores, plus signs, and hyphens. Each definition applies to the current article only; an invalid or duplicate definition remains ordinary Markdown instead of silently replacing another term.</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>Markdown File Includes</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/markdown-includes/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/markdown-includes/</id>
+    <published>2026-08-28T00:00:00.000Z</published>
+    <updated>2026-08-28T00:00:00.000Z</updated>
+    <summary>Build-time Markdown file and slice includes.</summary>
+    <content type="html"><![CDATA[<p>Shirone can include a local Markdown file or a safe slice of one.</p>
+<p>&lt;!-- @include: src/content/snippets/include-example.md#public-api --&gt;</p>
+<p>The full file and line-range forms are also supported:</p>
+<pre><code>&lt;!-- @include: src/content/snippets/include-example.md --&gt;
+&lt;!-- @include: src/content/snippets/include-example.md{1-4} --&gt;
+&lt;!-- @include: src/content/snippets/include-example.md{5-} --&gt;
+&lt;!-- @include: src/content/snippets/include-example.md{-4} --&gt;
+</code></pre>
+<p>Include comments inside fenced code remain literal.</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>Markdown Marker Highlights</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/marker-highlights/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/marker-highlights/</id>
+    <published>2026-08-28T00:00:00.000Z</published>
+    <updated>2026-08-28T00:00:00.000Z</updated>
+    <summary>Highlight key phrases with token-driven marker syntax in Shirone Markdown.</summary>
+    <content type="html"><![CDATA[<p>Marker highlights bring attention to a specific phrase without turning the surrounding paragraph into a separate component. They render as native <code>&lt;mark&gt;</code> elements during the build and inherit the active M3E color system.</p>
+<h2>Default emphasis</h2>
+<p>Use <code>==text==</code> when the article's primary color should carry the emphasis. This is useful for ==one decision that readers should retain== while they continue through an ordinary paragraph.</p>
+<p>The marker may contain ==nested <strong>Markdown emphasis</strong>== when the phrase needs a stronger hierarchy.</p>
+<h2>Semantic colors</h2>
+<p>Use a suffix when the meaning needs a different tonal role. The available variants are <code>primary</code>, <code>secondary</code>, <code>tertiary</code>, <code>error</code>, and <code>tip</code>.</p>
+<ul>
+<li>==Primary connects the phrase to the active theme=={.primary}</li>
+<li>==Secondary keeps a supporting distinction quiet=={.secondary}</li>
+<li>==Tertiary adds a separate editorial signal=={.tertiary}</li>
+<li>==Error identifies a condition that needs correction=={.error}</li>
+<li>==Tip highlights practical guidance=={.tip}</li>
+</ul>
+<h2>Author syntax</h2>
+<pre><code>==Primary marker==
+
+==Secondary marker=={.secondary}
+==Tertiary marker=={.tertiary}
+==Error marker=={.error}
+==Tip marker=={.tip}
+</code></pre>
+<p>Inline code such as <code>==literal marker syntax==</code> and fenced examples stay literal, so documentation can explain the syntax without triggering it.</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>Markdown Option Groups</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/option-groups/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/option-groups/</id>
+    <published>2026-08-28T00:00:00.000Z</published>
+    <updated>2026-08-28T00:00:00.000Z</updated>
+    <summary>Present related Markdown alternatives in compact, synchronized M3E option groups.</summary>
+    <content type="html"><![CDATA[<p>Option groups keep equivalent instructions together without repeating the surrounding explanation. Each option accepts full block Markdown, while the selected value can synchronize with another group on the same page.</p>
+<h2>Choose a package manager</h2>
+<p>Use <code>@tab:active</code> to select the initial option. A suffix after <code>#</code> supplies a stable value without changing the visible title.</p>
+<p>::: tabs#package-manager</p>
+<p>@tab npm</p>
+<p>Install the package with npm:</p>
+<pre><code>npm install astro
+</code></pre>
+<p>@tab:active <strong>pnpm</strong>#pnpm</p>
+<p>Install the package with pnpm:</p>
+<pre><code>pnpm.cmd add astro
+</code></pre>
+<p>@tab Bun#bun</p>
+<p>Install the package with Bun:</p>
+<pre><code>bun add astro
+</code></pre>
+<p>:::</p>
+<h2>Run the project</h2>
+<p>This group shares the <code>package-manager</code> id. Selecting an option above updates the matching command below and remembers that choice for the next visit.</p>
+<p>::: tabs#package-manager</p>
+<p>@tab npm</p>
+<pre><code>npm run dev
+</code></pre>
+<p>@tab pnpm</p>
+<pre><code>pnpm.cmd dev
+</code></pre>
+<p>@tab Bun#bun</p>
+<pre><code>bun run dev
+</code></pre>
+<p>:::</p>
+<h2>Many alternatives</h2>
+<p>Longer option rows remain on one line and scroll within their own navigation area on narrow screens.</p>
+<p>::: tabs</p>
+<p>@tab Local workstation</p>
+<p>Use the local toolchain while developing a feature.</p>
+<p>@tab Hosted preview environment</p>
+<p>Publish a temporary preview for review.</p>
+<p>@tab Continuous integration</p>
+<p>Run deterministic validation for every change.</p>
+<p>@tab Production deployment</p>
+<p>Promote a verified artifact to production.</p>
+<p>@tab Offline recovery workflow</p>
+<p>Restore from a local artifact when the network is unavailable.</p>
+<p>:::</p>
+<h2>Author syntax</h2>
+<pre><code>::: tabs#package-manager
+
+@tab npm
+
+Use npm instructions here.
+
+@tab:active **pnpm**#pnpm
+
+Use pnpm instructions here.
+
+:::
+</code></pre>
+<p>Each group needs at least two <code>@tab</code> sections, and every section needs body content separated from its marker by a blank line. Invalid or incomplete groups remain readable as ordinary Markdown.</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>Markdown Spoilers</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/spoilers/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/spoilers/</id>
+    <published>2026-08-28T00:00:00.000Z</published>
+    <updated>2026-08-28T00:00:00.000Z</updated>
+    <summary>Hide inline answers while keeping spoiler content accessible in Shirone Markdown.</summary>
+    <content type="html"><![CDATA[<p>Spoilers conceal a short answer or plot detail without removing it from the document. Hover, focus, or activate the native control to reveal the content.</p>
+<h2>Inline details</h2>
+<p>The answer is :spoiler[<strong>42</strong>], and this sentence remains ordinary Markdown around it.</p>
+<p>Spoilers can include <code>inline code</code> and :spoiler[a longer detail with <strong>emphasis</strong>].</p>
+<h2>Author syntax</h2>
+<pre><code>The answer is :spoiler[42].
+</code></pre>
+<p>The generated HTML uses a native button with an <code>aria-expanded</code> state. Without JavaScript, hover and focus still reveal the text; the optional runtime adds click and keyboard toggling.</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>Markdown Admonitions</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/admonitions/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/admonitions/</id>
+    <published>2026-08-27T00:00:00.000Z</published>
+    <updated>2026-08-27T00:00:00.000Z</updated>
+    <summary>Present notes, warnings, and optional details with Shirone&apos;s M3E Markdown containers.</summary>
+    <content type="html"><![CDATA[<p>Admonitions keep supporting information visually distinct while preserving the article's reading flow. Every form is rendered on the server and uses the same compact M3E component.</p>
+<h2>Semantic variants</h2>
+<p>::: note Deployment context
+The spaced form accepts a plain custom title while remaining compatible with the reference syntax.
+:::</p>
+<p>:::info
+Use information blocks for neutral context that helps readers understand the surrounding section.
+:::</p>
+<p>:::tip[Existing <strong>label</strong> syntax]
+The original bracket label remains available and can contain inline Markdown emphasis.
+:::</p>
+<blockquote>
+<p>[!IMPORTANT]
+GitHub Alert syntax enters the same renderer, so existing articles keep one visual language.</p>
+</blockquote>
+<p>:::warning
+Check environment variables before running a production build.
+:::</p>
+<p>:::caution
+Do not publish credentials, local configuration, or private keys with an example.
+:::</p>
+<h2>Optional details</h2>
+<p>::: details Inspect the complete command
+The disclosure uses native browser semantics and remains keyboard accessible without client JavaScript.</p>
+<pre><code>npx.cmd astro check
+pnpm.cmd build
+</code></pre>
+<ul>
+<li>It starts closed.</li>
+<li>Long code can scroll inside its own code block.</li>
+<li>The container remains within the article width on narrow screens.
+:::</li>
+</ul>
+<h2>Author syntax</h2>
+<pre><code>:::note[Existing title syntax]
+Content
+:::
+
+::: warning Plume-compatible title syntax
+Content
+:::
+
+&gt; [!TIP]
+&gt; GitHub Alert syntax
+
+::: details Optional content
+Hidden until the reader opens it.
+:::
+</code></pre>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>Content Annotations</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/content-annotations/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/content-annotations/</id>
+    <published>2026-08-27T00:00:00.000Z</published>
+    <updated>2026-08-27T00:00:00.000Z</updated>
+    <summary>Add compact, accessible supporting notes to Shirone articles without interrupting the reading flow.</summary>
+    <content type="html"><![CDATA[<p>Content annotations keep supporting context close to a sentence without placing it directly in the reading flow. Activate the small note marker to reveal its content.</p>
+<h2>Basic syntax</h2>
+<p>Add a <code>[+label]</code> reference in ordinary prose, then define the matching note elsewhere in the same article.</p>
+<pre><code>Astro renders most of a page ahead of time and hydrates **interactive islands** [+islands] only when they need to become interactive.
+
+[+islands]:
+  An island is an interactive UI component surrounded by static HTML. This keeps the default page lightweight while preserving focused interactivity.
+</code></pre>
+<p>Astro renders most of a page ahead of time and hydrates <strong>interactive islands</strong> [+islands] only when they need to become interactive.</p>
+<p>[+islands]:
+An island is an interactive UI component surrounded by static HTML. This keeps the default page lightweight while preserving focused interactivity.</p>
+<h2>Rich content</h2>
+<p>Definitions may contain paragraphs, emphasis, links, lists, and inline code [+rich-note] while the surrounding sentence continues normally.</p>
+<p>[+rich-note]:
+<strong>Authoring guidance</strong></p>
+<ul>
+<li>Keep the first sentence self-contained.</li>
+<li>Use a link when readers may need the primary source.</li>
+<li>Prefer concise examples such as <code>client:visible</code>.</li>
+</ul>
+<p>See the <a href="https://docs.astro.build/en/concepts/islands/">Astro islands documentation</a> for the full model.</p>
+<h2>Multiple definitions</h2>
+<p>Reuse a label [+review] to present a short sequence of related notes behind one marker.</p>
+<p>[+review]: Start with the decision that changes the reader's next action.
+[+review]: Keep implementation evidence separate from background context.
+[+review]: Remove details that belong in the main article instead of the annotation.</p>
+<p>Undefined references such as <code>[+missing]</code> remain ordinary text, so an unfinished definition never creates an empty control.</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>Markdown Steps</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/steps/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/steps/</id>
+    <published>2026-08-27T00:00:00.000Z</published>
+    <updated>2026-08-27T00:00:00.000Z</updated>
+    <summary>Present sequential instructions as a compact, accessible step flow in Shirone.</summary>
+    <content type="html"><![CDATA[<p>Use Steps for procedures whose order matters. The component keeps the article reading flow intact: a quiet numbered rail provides orientation while headings, paragraphs, links, lists, and code retain their native Markdown roles.</p>
+<h2>Ordered list syntax</h2>
+<p>Wrap one Markdown ordered list in a <code>:::steps</code> container. Each top-level list item becomes one step.</p>
+<pre><code>:::steps[Production deployment]
+1. **Clone and prepare the workspace**
+
+   Clone the repository and enter the project directory.
+
+   ```powershell
+   git clone https://github.com/LyraVoid/Shirone.git
+   Set-Location Shirone
+   ```
+
+2. **Install dependencies**
+
+   Use the repository's pinned package manager.
+
+   ```powershell
+   pnpm.cmd install
+   ```
+
+3. **Run project checks**
+
+   Confirm Astro diagnostics and TypeScript checks pass.
+
+   ```powershell
+   npx.cmd astro check
+   pnpm.cmd type-check
+   ```
+
+4. **Build the production site**
+
+   Generate the static site and search index.
+
+   ```powershell
+   pnpm.cmd build
+   ```
+:::
+</code></pre>
+<p>:::steps[Production deployment]</p>
+<ol>
+<li>
+<p><strong>Clone and prepare the workspace</strong></p>
+<p>Clone the repository and enter the project directory.</p>
+<pre><code>git clone https://github.com/LyraVoid/Shirone.git
+Set-Location Shirone
+</code></pre>
+</li>
+<li>
+<p><strong>Install dependencies</strong></p>
+<p>Use the repository's pinned package manager.</p>
+<pre><code>pnpm.cmd install
+</code></pre>
+</li>
+<li>
+<p><strong>Run project checks</strong></p>
+<p>Confirm Astro diagnostics and TypeScript checks pass.</p>
+<pre><code>npx.cmd astro check
+pnpm.cmd type-check
+</code></pre>
+</li>
+<li>
+<p><strong>Build the production site</strong></p>
+<p>Generate the static site and search index.</p>
+<pre><code>pnpm.cmd build
+</code></pre>
+</li>
+</ol>
+<p>:::</p>
+<h2>Options</h2>
+<ul>
+<li><code>:::steps[Title]</code> or <code>title="Title"</code> adds a visible label and accessible name.</li>
+<li><code>start=4</code> changes the first displayed step number.</li>
+<li>The container must contain exactly one ordered list. Invalid or mixed input remains ordinary readable Markdown instead of being interpreted heuristically.</li>
+<li>Rendering is completed during the site build and adds no client JavaScript or network requests.</li>
+</ul>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>MDX Integration and M3E Atomic Components</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/mdx-showcase/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/mdx-showcase/</id>
+    <published>2026-08-20T00:00:00.000Z</published>
+    <updated>2026-08-20T00:00:00.000Z</updated>
+    <summary>A comprehensive guide to composing rich interactive articles in Shirone using MDX, Svelte 5 interactive islands, and Material 3 Expressive design tokens.</summary>
+    <content type="html"><![CDATA[<p>:::tip
+<strong>MDX (Markdown + JSX)</strong> bridges the gap between static writing and application interfaces. In Shirone, authors can seamlessly mix dynamic logic, reactive Svelte 5 components, and Material 3 design tokens directly within post content.
+:::</p>
+<h2>1. Markdown vs MDX Capability Matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Standard Markdown (<code>.md</code>)</th>
+<th>Shirone MDX (<code>.mdx</code>)</th>
+<th>Execution Mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Typography &amp; Structure</strong></td>
+<td>Full Support</td>
+<td>Full Support</td>
+<td>Static SSR</td>
+</tr>
+<tr>
+<td><strong>Code Highlighting</strong></td>
+<td>Line Numbers, Frames, Collapsible</td>
+<td>Line Numbers, Frames, Collapsible</td>
+<td>Static SSR (Expressive Code)</td>
+</tr>
+<tr>
+<td><strong>Diagrams &amp; Mathematics</strong></td>
+<td>Mermaid, KaTeX</td>
+<td>Mermaid, KaTeX</td>
+<td>Client Enhanced</td>
+</tr>
+<tr>
+<td><strong>Callout Admonitions</strong></td>
+<td>Note, Tip, Important, Warning, Caution</td>
+<td>Note, Tip, Important, Warning, Caution</td>
+<td>Static SSR</td>
+</tr>
+<tr>
+<td><strong>M3E Display Atoms</strong></td>
+<td>Not Available</td>
+<td>Direct Integration (``, <code>&lt;Skeleton&gt;</code>)</td>
+<td>Pure SSR (Zero Client JS)</td>
+</tr>
+<tr>
+<td><strong>Svelte 5 Reactive Islands</strong></td>
+<td>Not Available</td>
+<td>On-Demand Hydration (<code>&lt;Button&gt;</code>, <code>&lt;Switch&gt;</code>)</td>
+<td><code>client:visible</code> Lazy Hydrated</td>
+</tr>
+<tr>
+<td><strong>Feedback &amp; Loading Atoms</strong></td>
+<td>Not Available</td>
+<td>Animated Morph (<code>&lt;LoadingIndicator&gt;</code>)</td>
+<td><code>client:visible</code> Reactive</td>
+</tr>
+<tr>
+<td><strong>Dynamic JSX Expressions</strong></td>
+<td>Not Available</td>
+<td>Native Evaluation (<code>{authorInfo.ui}</code>)</td>
+<td>Compile-Time / Client</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Dynamic Expressions and Data Mapping</h2>
+<p>MDX allows declaring scoped constants using <code>export const</code> at the top of the file, which can be evaluated inline or mapped across templates:</p>
+<ul>
+<li><strong>Core Framework</strong>: {authorInfo.framework}</li>
+<li><strong>UI Engine</strong>: {authorInfo.ui}</li>
+<li><strong>Design Tokens</strong>: {authorInfo.tokens}</li>
+<li><strong>Architecture Pattern</strong>: {authorInfo.architecture}</li>
+</ul>
+<p>Arrays and collections can be rendered dynamically into grid layouts:</p>
+<p>&lt;div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6"&gt;
+{showcaseItems.map((item, idx) =&gt; (
+&lt;div key={item.name} class="p-4 rounded-xl border border-[var(--outline-variant)] bg-[var(--surface-container-low)]"&gt;
+&lt;div class="flex items-center gap-2 mb-1"&gt;
+&lt;span class="w-6 h-6 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-xs flex items-center justify-center font-bold"&gt;
+{idx + 1}
+&lt;/span&gt;
+&lt;span class="font-bold text-[var(--on-surface)]"&gt;{item.name}&lt;/span&gt;
+&lt;/div&gt;
+&lt;p class="text-sm text-[var(--on-surface-variant)] m-0"&gt;{item.desc}&lt;/p&gt;
+&lt;/div&gt;
+))}
+&lt;/div&gt;</p>
+<hr />
+<h2>3. M3E Display and Layout Primitives (SSR-Only)</h2>
+<p>In accordance with Shirone's component architecture (<code>docs/atomic-structure.md</code>), stateless display components output clean, accessible semantic HTML with no client-side runtime payload.</p>
+<h3>3.1 Card Containers (<code>Card.svelte</code>)</h3>
+<p>&lt;div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6"&gt;
+&lt;Card variant="filled" class="!p-5"&gt;
+&lt;div class="font-bold text-[var(--primary)] mb-2"&gt;Filled Card&lt;/div&gt;
+&lt;div class="text-sm text-[var(--on-surface-variant)]"&gt;Default container background with no elevation shadow. Ideal for grouped content blocks.&lt;/div&gt;</p>
+<pre><code>&lt;div class="font-bold text-[var(--primary)] mb-2"&gt;Elevated Card&lt;/div&gt;
+&lt;div class="text-sm text-[var(--on-surface-variant)]"&gt;Level 1 container elevation with interactive state layering for heightened visual focus.&lt;/div&gt;
+
+
+
+&lt;div class="font-bold text-[var(--primary)] mb-2"&gt;Outlined Card&lt;/div&gt;
+&lt;div class="text-sm text-[var(--on-surface-variant)]"&gt;A crisp 1px outline boundary providing clean separation on neutral surfaces.&lt;/div&gt;
+</code></pre>
+<p>&lt;/div&gt;</p>
+<h3>3.2 Accent Bars and Badges (<code>AccentBar</code> &amp; <code>Badge</code>)</h3>
+<p>&lt;div class="flex items-center gap-4 my-4 p-4 rounded-lg bg-[var(--surface-container-high)]"&gt;</p>
+<p>&lt;div class="flex-1"&gt;
+&lt;span class="font-bold text-lg"&gt;System Announcement&lt;/span&gt;
+&lt;p class="text-xs text-[var(--on-surface-variant)] m-0"&gt;Combine AccentBar with Badge to build prominent visual callouts&lt;/p&gt;
+&lt;/div&gt;
+M3E v0.192
+&lt;/div&gt;</p>
+<h3>3.3 Skeleton Placeholders (<code>Skeleton.svelte</code>)</h3>
+<p>For previewing layout skeletons or prototyping async states:</p>
+<p>&lt;div class="flex flex-col gap-3 my-6 p-5 rounded-xl border border-[var(--outline-variant)] bg-[var(--surface-container-low)]"&gt;
+&lt;div class="flex items-center gap-3"&gt;</p>
+<pre><code>&lt;div class="flex flex-col gap-1.5 flex-1"&gt;
+  
+  
+&lt;/div&gt;
+</code></pre>
+<p>&lt;/div&gt;</p>
+<p>&lt;/div&gt;</p>
+<hr />
+<h2>4. Feedback and Loading Indicators</h2>
+<p>Shirone features full-fidelity Material 3 Expressive motion and feedback atoms:</p>
+<h3>4.1 Morphing Loading Indicator (<code>LoadingIndicator.svelte</code>)</h3>
+<p>Implemented with <code>androidx.graphics.shapes</code> polygon morphing, providing smooth spring-interpolated 7-shape animations:</p>
+<p>&lt;div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6 p-6 rounded-2xl bg-[var(--surface-container)] border border-[var(--outline-variant)] text-center"&gt;
+&lt;div class="flex flex-col items-center gap-2"&gt;
+&lt;div class="h-16 flex items-center justify-center"&gt;</p>
+<pre><code>&lt;/div&gt;
+&lt;span class="text-xs text-[var(--on-surface-variant)]"&gt;Indeterminate Shape Morph&lt;/span&gt;
+</code></pre>
+<p>&lt;/div&gt;</p>
+<p>&lt;div class="flex flex-col items-center gap-2"&gt;
+&lt;div class="h-16 flex items-center justify-center"&gt;</p>
+<pre><code>&lt;/div&gt;
+&lt;span class="text-xs text-[var(--on-surface-variant)]"&gt;Contained Circular Variant&lt;/span&gt;
+</code></pre>
+<p>&lt;/div&gt;</p>
+<p>&lt;div class="flex flex-col items-center gap-2"&gt;
+&lt;div class="h-16 flex items-center justify-center"&gt;</p>
+<pre><code>&lt;/div&gt;
+&lt;span class="text-xs text-[var(--on-surface-variant)]"&gt;Determinate Progress (68%)&lt;/span&gt;
+</code></pre>
+<p>&lt;/div&gt;
+&lt;/div&gt;</p>
+<h3>4.2 Linear and Indeterminate Progress (<code>ProgressIndicator.svelte</code>)</h3>
+<p>&lt;div class="flex flex-col gap-4 my-6 p-6 rounded-2xl bg-[var(--surface-container)] border border-[var(--outline-variant)]"&gt;
+&lt;div class="flex flex-col gap-2"&gt;
+&lt;div class="flex justify-between text-xs text-[var(--on-surface-variant)]"&gt;
+&lt;span&gt;Pipeline Compilation&lt;/span&gt;
+&lt;span&gt;80%&lt;/span&gt;
+&lt;/div&gt;</p>
+<p>&lt;/div&gt;</p>
+<p>&lt;div class="flex flex-col gap-2 mt-2"&gt;
+&lt;div class="text-xs text-[var(--on-surface-variant)]"&gt;Continuous Dual-Line Animation&lt;/div&gt;</p>
+<p>&lt;/div&gt;
+&lt;/div&gt;</p>
+<hr />
+<h2>5. Interactive Svelte 5 Islands</h2>
+<p>Components declared with <code>client:visible</code> are lazy-hydrated via <code>IntersectionObserver</code> when entering the viewport:</p>
+<h3>5.1 Button Matrix (<code>Button.svelte</code>)</h3>
+<p>&lt;div class="flex flex-wrap items-center gap-3 my-6 p-4 rounded-xl border border-[var(--outline-variant)]"&gt;
+Filled Button
+Elevated
+Tonal Button
+Outlined
+Text Button
+&lt;/div&gt;</p>
+<h3>5.2 Filter Chips and Segmented Buttons (<code>Chips</code> &amp; <code>SegmentedButton</code>)</h3>
+<p>&lt;div class="flex flex-col gap-4 my-6 p-6 rounded-2xl bg-[var(--surface-container)] border border-[var(--outline-variant)]"&gt;
+&lt;div&gt;
+&lt;div class="text-xs font-bold text-[var(--on-surface-variant)] mb-2"&gt;M3E Filter Chips&lt;/div&gt;</p>
+<p>&lt;/div&gt;</p>
+<p>&lt;div&gt;
+&lt;div class="text-xs font-bold text-[var(--on-surface-variant)] mb-2"&gt;Segmented Control&lt;/div&gt;</p>
+<p>&lt;/div&gt;
+&lt;/div&gt;</p>
+<h3>5.3 Switches, Checkboxes, and Sliders (<code>Switch</code>, <code>Checkbox</code>, <code>Slider</code>)</h3>
+<p>&lt;div class="flex flex-col gap-4 my-6 p-6 rounded-2xl bg-[var(--surface-container)] border border-[var(--outline-variant)]"&gt;
+&lt;div class="flex items-center justify-between"&gt;
+&lt;span class="font-bold text-sm"&gt;Switch with Status Icons&lt;/span&gt;</p>
+<p>&lt;/div&gt;</p>
+<p>&lt;div class="flex items-center justify-between"&gt;
+&lt;span class="font-bold text-sm"&gt;Selection Checkboxes&lt;/span&gt;
+&lt;div class="flex items-center gap-4"&gt;</p>
+<pre><code>&lt;/div&gt;
+</code></pre>
+<p>&lt;/div&gt;</p>
+<p>&lt;div class="flex flex-col gap-2"&gt;
+&lt;span class="font-bold text-sm"&gt;Hue Spectrum Slider&lt;/span&gt;</p>
+<p>&lt;/div&gt;
+&lt;/div&gt;</p>
+<h3>5.4 Input Controls (<code>TextField.svelte</code>)</h3>
+<p>&lt;div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6"&gt;</p>
+<p>&lt;/div&gt;</p>
+<hr />
+<h2>6. Markdown Extension Compatibility</h2>
+<p>Shirone's SSOT unified plugin pipeline preserves full compatibility with all Markdown extensions:</p>
+<h3>6.1 GitHub Repository Cards</h3>
+<p>::github{repo="saicaca/fuwari"}</p>
+<h3>6.2 Mermaid Architecture Diagrams</h3>
+<pre><code>flowchart TD
+    MDX[MDX Source Entry] --&gt; Compiler["@astrojs/mdx Compiler"]
+    Compiler --&gt; Plugins["Remark / Rehype SSOT Pipeline"]
+    Plugins --&gt; Islands["Svelte 5 Interactive Islands"]
+    Islands --&gt; Swup["Swup Client Navigation Shell"]
+    Swup --&gt; Screen["M3E Expressive Article View"]
+</code></pre>
+<h3>6.3 Mathematical Expressions (LaTeX / KaTeX)</h3>
+<p>Inline equation: Mass-energy equivalence $E = mc^2$ and Gaussian integral $\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}$.</p>
+<p>Block equation:</p>
+<p>$$
+\mathcal{L}<em>{M3E} = \sum</em>{i=1}^{N} \left( \text{Token}_i \cdot \text{ContrastRatio} \right) + \lambda |\text{MotionElegance}|
+$$</p>
+<hr />
+<h2>7. Summary</h2>
+<p>The native integration of MDX empowers technical writers to build rich, interactive documentation while preserving Shirone's ultra-fast static performance. All components adhere to the Material 3 Expressive token design system, ensuring consistency, accessibility, and visual harmony.</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>Image Gallery Grid: Syntax and Complete Examples</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/image-grid-demo/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/image-grid-demo/</id>
+    <published>2026-07-13T00:00:00.000Z</published>
+    <updated>2026-07-13T00:00:00.000Z</updated>
+    <summary>A complete guide to image gallery grid syntax, parameters, cropping, responsive behavior, captions, and lightbox navigation.</summary>
+    <content type="html"><![CDATA[<p><code>:::grid</code> is the blog's image gallery container directive. It arranges ordinary Markdown images in a responsive grid with a consistent aspect ratio and automatically enables lightbox viewing. Use it for article images, screenshots, portfolios, or small albums.</p>
+<p>Images in the same gallery use the same card ratio. By default, center cropping fills every card and keeps each row tidy; clicking an image opens the complete original in a lightbox. Every gallery has its own lightbox group and does not mix with other images in the post.</p>
+<blockquote>
+<p>This post is both feature documentation and a visual test page. View the examples at desktop, tablet, and mobile widths, then click any image to verify lightbox grouping.</p>
+</blockquote>
+<h2>Minimal Syntax</h2>
+<p>Write Markdown images directly between <code>:::grid</code> and the closing <code>:::</code>:</p>
+<pre><code>:::grid
+![Image description](./image-1.webp)
+
+![Image description](./image-2.webp)
+:::
+</code></pre>
+<p>Each image must occupy its own paragraph, with a blank line between images. Keep only images in a gallery; write paragraphs, lists, and code blocks outside the container.</p>
+<p>Here is the result of the minimal syntax. Without parameters, the grid uses three columns, a <code>16/10</code> ratio, and <code>cover</code> by default.</p>
+<p>:::grid
+<img src="./landscape-1.webp" alt="Minimal syntax result: first image" /></p>
+<p><img src="./landscape-2.webp" alt="Minimal syntax result: second image" />
+:::</p>
+<h2>Parameters at a Glance</h2>
+<p>Write all parameters in braces after the opening directive: <code>:::grid{parameter="value"}</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Allowed values</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>columns</code></td>
+<td>Integers from <code>1</code> to <code>6</code></td>
+<td><code>3</code></td>
+<td>Number of columns per row on desktop. Invalid values fall back to <code>3</code>.</td>
+</tr>
+<tr>
+<td><code>aspect</code></td>
+<td>A positive ratio, such as <code>16/9</code>, <code>3/4</code>, or <code>1/1</code></td>
+<td><code>16/10</code></td>
+<td>The displayed card ratio, not the original image ratio.</td>
+</tr>
+<tr>
+<td><code>fit</code></td>
+<td><code>cover</code>, <code>contain</code></td>
+<td><code>cover</code></td>
+<td>Image fitting mode. <code>cover</code> crops to fill; <code>contain</code> preserves the complete image and may leave empty space.</td>
+</tr>
+</tbody>
+</table>
+<p>Complete example:</p>
+<pre><code>:::grid{columns="3" aspect="16/9" fit="cover"}
+![First image](./image-1.webp "Optional caption")
+
+![Second image](./image-2.webp "Optional caption")
+
+![Third image](./image-3.webp "Optional caption")
+:::
+</code></pre>
+<p>The following result uses the three-column landscape syntax above. Compare the card ratio, column count, and the way a title takes precedence over alt text as the caption:</p>
+<p>:::grid{columns="3" aspect="16/9" fit="cover"}
+<img src="./landscape-1.webp" alt="Parameter example: first landscape image" title="Landscape caption 1" /></p>
+<p><img src="./landscape-2.webp" alt="Parameter example: second landscape image" title="Landscape caption 2" /></p>
+<p><img src="./landscape-3.webp" alt="Parameter example: third landscape image" title="Landscape caption 3" />
+:::</p>
+<h2>Captions and Alt Text</h2>
+<p>An image's alt text serves both as accessible alternative text and as its default caption. When an image has an optional title, the title is used as the caption instead:</p>
+<pre><code>![Text used for accessibility](./image.webp "Caption shown below the image")
+</code></pre>
+<p>In the same row, captions align to the bottom of every card. A wrapping caption does not make the others float at a different height. Ratio text such as <code>3:4</code> and <code>16:9</code> can be written directly in body text, headings, and alt text without escaping.</p>
+<p>This example demonstrates the default alt-text caption, an explicit title caption, and bottom alignment for a longer caption:</p>
+<p>:::grid{columns="3" aspect="1/1"}
+<img src="./square-1.webp" alt="This image has no title, so its alt text is the caption" /></p>
+<p><img src="./square-2.webp" alt="Second square image with accessible alt text" title="This title is displayed as the caption" /></p>
+<p><img src="./square-3.webp" alt="Accessible description of a 3:4 poster" title="This is a longer caption for checking that every caption remains aligned to the bottom of its card when it wraps" />
+:::</p>
+<h2>Layout and Cropping</h2>
+<p>Desktop layouts use the number of columns specified by <code>columns</code>. Below <code>768px</code>, grids use at most two columns; below <code>480px</code>, they switch to one column. The card wrapper fixes the <code>aspect</code> ratio and clips rounded corners, while the image fills the card without the theme's default image margins.</p>
+<ul>
+<li>Choose <code>cover</code>: the recommended default. Images are cropped from the center to fill the card, making the gallery look consistent.</li>
+<li>Choose <code>contain</code>: the full original image is shown without cropping. When its ratio differs from the card, the theme background remains visible; use this for images that cannot be cropped.</li>
+<li>To preserve the complete image without empty space, set <code>aspect</code> close to the original image ratio or place the image in a grid of its own.</li>
+</ul>
+<p>The following examples place the same portrait images in <code>16/9</code> cards with <code>cover</code> and <code>contain</code>. The first crops them; the second preserves the full image and leaves background space.</p>
+<pre><code>:::grid{columns="3" aspect="16/9" fit="cover"}
+![Image description](./image-1.webp "Optional caption")
+
+![Image description](./image-2.webp "Optional caption")
+:::
+
+:::grid{columns="3" aspect="16/9" fit="contain"}
+![Image description](./image-1.webp "Optional caption")
+
+![Image description](./image-2.webp "Optional caption")
+:::
+</code></pre>
+<p>:::grid{columns="3" aspect="16/9" fit="cover"}
+<img src="./default-portrait-1.webp" alt="First cover result" title="Cover: center crop" /></p>
+<p><img src="./default-portrait-2.webp" alt="Second cover result" title="Cover: fill the card" /></p>
+<p><img src="./default-portrait-3.webp" alt="Third cover result" title="Cover: a more consistent layout" />
+:::</p>
+<p>:::grid{columns="3" aspect="16/9" fit="contain"}
+<img src="./default-portrait-1.webp" alt="First contain result" title="Contain: preserve the complete original" /></p>
+<p><img src="./default-portrait-2.webp" alt="Second contain result" title="Contain: empty space may appear" /></p>
+<p><img src="./default-portrait-3.webp" alt="Third contain result" title="Contain: suitable for edge details" />
+:::</p>
+<h2>Default Configuration</h2>
+<p>Without attributes, the default is three columns, a <code>16/10</code> ratio, and <code>cover</code> cropping. These three portrait images verify default cropping and captions.</p>
+<pre><code>:::grid
+![Image description](./image-1.webp)
+
+![Image description](./image-2.webp)
+
+![Image description](./image-3.webp)
+:::
+</code></pre>
+<p>:::grid
+<img src="./default-portrait-1.webp" alt="Default configuration: portrait image one" /></p>
+<p><img src="./default-portrait-2.webp" alt="Default configuration: portrait image two" /></p>
+<p><img src="./default-portrait-3.webp" alt="Default configuration: portrait image three" />
+:::</p>
+<h2>Three-Column Portraits: 3:4</h2>
+<p>With <code>aspect="3/4"</code>, the three portrait images fill consistently proportioned vertical cards. If an original image has a different ratio, <code>cover</code> crops its edges from the center.</p>
+<pre><code>:::grid{columns="3" aspect="3/4"}
+![Portrait image description](./portrait-1.webp)
+
+![Portrait image description](./portrait-2.webp)
+
+![Portrait image description](./portrait-3.webp)
+:::
+</code></pre>
+<p>:::grid{columns="3" aspect="3/4"}
+<img src="./default-portrait-1.webp" alt="3:4 test image one" title="Portrait 1" /></p>
+<p><img src="./default-portrait-2.webp" alt="3:4 test image two" title="Portrait 2" /></p>
+<p><img src="./default-portrait-3.webp" alt="3:4 test image three" title="Portrait 3" />
+:::</p>
+<h2>Three-Column Landscapes: 16:9</h2>
+<p>This set demonstrates a common video-cover ratio in a three-column layout. Cropping is minimal when the landscape images are close to the card ratio.</p>
+<pre><code>:::grid{columns="3" aspect="16/9"}
+![Landscape image description](./landscape-1.webp)
+
+![Landscape image description](./landscape-2.webp)
+
+![Landscape image description](./landscape-3.webp)
+:::
+</code></pre>
+<p>:::grid{columns="3" aspect="16/9"}
+<img src="./feature-landscape-1.webp" alt="16:9 test image one" /></p>
+<p><img src="./feature-landscape-2.webp" alt="16:9 test image two" /></p>
+<p><img src="./feature-landscape-3.webp" alt="16:9 test image three" />
+:::</p>
+<h2>Two-Column Squares: 1:1</h2>
+<p>Two columns work well when larger preview cards are needed. The third image moves to the next row. The final row keeps its grid-track width instead of stretching images to fill the row.</p>
+<pre><code>:::grid{columns="2" aspect="1/1"}
+![Square image description](./square-1.webp)
+
+![Square image description](./square-2.webp)
+
+![Square image description](./square-3.webp)
+:::
+</code></pre>
+<p>:::grid{columns="2" aspect="1/1"}
+<img src="./mixed-square-1.webp" alt="1:1 test image one" /></p>
+<p><img src="./mixed-square-2.webp" alt="1:1 test image two" /></p>
+<p><img src="./mixed-square-3.webp" alt="1:1 test image three" />
+:::</p>
+<h2>Four Columns with <code>contain</code></h2>
+<p><code>fit="contain"</code> does not crop the original image. When the image ratio differs from the card ratio, the theme background remains visible. This is intentional, not a layout issue. It also verifies that four-column grids and separate lightbox groups do not interfere with each other.</p>
+<pre><code>:::grid{columns="4" aspect="16/9" fit="contain"}
+![Image description](./image-1.webp)
+
+![Image description](./image-2.webp)
+
+![Image description](./image-3.webp)
+:::
+</code></pre>
+<p>:::grid{columns="4" aspect="16/9" fit="contain"}
+<img src="./default-portrait-1.webp" alt="Contain: portrait image one" /></p>
+<p><img src="./default-portrait-2.webp" alt="Contain: portrait image two" /></p>
+<p><img src="./default-portrait-3.webp" alt="Contain: portrait image three" />
+:::</p>
+<h2>Single-Column Detail Image</h2>
+<p>One column is suitable when an image needs a larger reading size. It remains one column on desktop, tablet, and mobile, and the original is still available in the lightbox.</p>
+<pre><code>:::grid{columns="1" aspect="16/9"}
+![Image description](./detail.webp)
+:::
+</code></pre>
+<p>:::grid{columns="1" aspect="16/9"}
+<img src="./feature-landscape-1.webp" alt="Single-column test image" />
+:::</p>
+<h2>Sparse Five-Column Row</h2>
+<p>Five columns verify a higher supported column count. With only three images, the final row remains left-aligned instead of stretching the images.</p>
+<pre><code>:::grid{columns="5" aspect="1/1"}
+![Thumbnail description](./thumb-1.webp)
+
+![Thumbnail description](./thumb-2.webp)
+
+![Thumbnail description](./thumb-3.webp)
+:::
+</code></pre>
+<p>:::grid{columns="5" aspect="1/1"}
+<img src="./mixed-square-1.webp" alt="Five-column test image one" /></p>
+<p><img src="./mixed-square-2.webp" alt="Five-column test image two" /></p>
+<p><img src="./mixed-square-3.webp" alt="Five-column test image three" />
+:::</p>
+<h2>Mixed Images in Six Columns</h2>
+<p>Six columns are the current maximum. Mixing landscape and portrait images verifies <code>cover</code> cropping, captions on narrow cards, and a dense desktop layout. For readable article content, two to four columns are usually preferable.</p>
+<pre><code>:::grid{columns="6" aspect="1/1"}
+![Image description](./image-1.webp)
+
+![Image description](./image-2.webp)
+
+![Image description](./image-3.webp)
+
+![Image description](./image-4.webp)
+
+![Image description](./image-5.webp)
+
+![Image description](./image-6.webp)
+:::
+</code></pre>
+<p>:::grid{columns="6" aspect="1/1"}
+<img src="./default-portrait-1.webp" alt="Six-column test image one" /></p>
+<p><img src="./default-portrait-2.webp" alt="Six-column test image two" /></p>
+<p><img src="./default-portrait-3.webp" alt="Six-column test image three" /></p>
+<p><img src="./feature-landscape-1.webp" alt="Six-column test image four" /></p>
+<p><img src="./feature-landscape-2.webp" alt="Six-column test image five" /></p>
+<p><img src="./feature-landscape-3.webp" alt="Six-column test image six" />
+:::</p>
+<h2>Four-Column Squares: 1:1</h2>
+<p>Four square images with the same ratio are a typical four-column layout. Desktop displays all four in one row; tablet collapses to two columns and mobile to one.</p>
+<pre><code>:::grid{columns="4" aspect="1/1"}
+![Square image description](./square-1.webp)
+
+![Square image description](./square-2.webp)
+
+![Square image description](./square-3.webp)
+
+![Square image description](./square-4.webp)
+:::
+</code></pre>
+<p>:::grid{columns="4" aspect="1/1"}
+<img src="./square-1.webp" alt="Square image one" /></p>
+<p><img src="./square-2.webp" alt="Square image two" /></p>
+<p><img src="./square-3.webp" alt="Square image three" /></p>
+<p><img src="./square-4.webp" alt="Square image four" />
+:::</p>
+<h2>Six-Column Landscapes: 16:9</h2>
+<p>Six landscape columns work well for thumbnail previews, portfolios, and screenshot indexes. Even if original ratios differ slightly, <code>cover</code> fills every <code>16/9</code> card consistently.</p>
+<pre><code>:::grid{columns="6" aspect="16/9"}
+![Landscape image description](./landscape-1.webp)
+
+![Landscape image description](./landscape-2.webp)
+
+![Landscape image description](./landscape-3.webp)
+
+![Landscape image description](./landscape-4.webp)
+
+![Landscape image description](./landscape-5.webp)
+
+![Landscape image description](./landscape-6.webp)
+:::
+</code></pre>
+<p>:::grid{columns="6" aspect="16/9"}
+<img src="./landscape-1.webp" alt="Landscape image one" /></p>
+<p><img src="./landscape-2.webp" alt="Landscape image two" /></p>
+<p><img src="./landscape-3.webp" alt="Landscape image three" /></p>
+<p><img src="./landscape-4.webp" alt="Landscape image four" /></p>
+<p><img src="./landscape-5.webp" alt="Landscape image five" /></p>
+<p><img src="./landscape-6.webp" alt="Landscape image six" />
+:::</p>
+<h2>Three-Column Portraits: 3:4</h2>
+<p>This group of six portrait images demonstrates a common layout for people, posters, or mobile screenshots. The images form two rows of three, with captions aligned to the bottom.</p>
+<pre><code>:::grid{columns="3" aspect="3/4"}
+![Portrait image description](./portrait-1.webp)
+
+![Portrait image description](./portrait-2.webp)
+
+![Portrait image description](./portrait-3.webp)
+
+![Portrait image description](./portrait-4.webp)
+
+![Portrait image description](./portrait-5.webp)
+
+![Portrait image description](./portrait-6.webp)
+:::
+</code></pre>
+<p>:::grid{columns="3" aspect="3/4"}
+<img src="./portrait-1.webp" alt="Portrait image one" /></p>
+<p><img src="./portrait-2.webp" alt="Portrait image two" /></p>
+<p><img src="./portrait-3.webp" alt="Portrait image three" /></p>
+<p><img src="./portrait-4.webp" alt="Portrait image four" /></p>
+<p><img src="./portrait-5.webp" alt="Portrait image five" /></p>
+<p><img src="./portrait-6.webp" alt="Portrait image six" />
+:::</p>
+<h2>Edge-Critical Content: <code>cover</code> and Lightbox</h2>
+<p>These images contain important text or details near their edges. <code>cover</code> keeps the grid tidy but may crop those edges; click an image to view the uncropped original in the lightbox. Use clear captions for edge-sensitive images, or use <code>contain</code> below.</p>
+<pre><code>:::grid{columns="3" aspect="16/9" fit="cover"}
+![Edge-critical content](./critical-1.webp "Open the lightbox to view the complete edge content")
+
+![Edge-critical content](./critical-2.webp "Open the lightbox to view the complete edge content")
+
+![Edge-critical content](./critical-3.webp "Open the lightbox to view the complete edge content")
+:::
+</code></pre>
+<p>:::grid{columns="3" aspect="16/9" fit="cover"}
+<img src="./critical-1.webp" alt="First edge-critical image" title="Open the lightbox to view the complete edge content" /></p>
+<p><img src="./critical-2.webp" alt="Second edge-critical image" title="Open the lightbox to view the complete edge content" /></p>
+<p><img src="./critical-3.webp" alt="Third edge-critical image" title="Open the lightbox to view the complete edge content" />
+:::</p>
+<h2>Extreme Ratios with <code>contain</code></h2>
+<p>For banners, long screenshots, and other extreme image ratios, <code>contain</code> displays the complete original. Unlike <code>cover</code>, it may leave theme-background space, but it never crops content.</p>
+<pre><code>:::grid{columns="3" aspect="16/9" fit="contain"}
+![Complete screenshot description](./wide-1.webp)
+
+![Complete screenshot description](./wide-2.webp)
+
+![Complete screenshot description](./wide-3.webp)
+:::
+</code></pre>
+<p>:::grid{columns="3" aspect="16/9" fit="contain"}
+<img src="./extreme-1.webp" alt="Extreme-ratio image one" /></p>
+<p><img src="./extreme-2.webp" alt="Extreme-ratio image two" /></p>
+<p><img src="./extreme-3.webp" alt="Extreme-ratio image three" />
+:::</p>
+<h2>Transparent Images</h2>
+<p>Transparent images reveal the card's theme background. This single-column <code>contain</code> example makes the transparent areas, original edges, and lightbox behavior easy to inspect.</p>
+<pre><code>:::grid{columns="1" aspect="16/9" fit="contain"}
+![Transparent image description](./transparent.webp)
+:::
+</code></pre>
+<p>:::grid{columns="1" aspect="16/9" fit="contain"}
+<img src="./transparent-1.webp" alt="Transparent-background test image" />
+:::</p>
+<h2>Lightbox Navigation</h2>
+<p>Click any image in a grid to open the Fancybox lightbox. There you can zoom, rotate, enter fullscreen, view thumbnails, and navigate with the arrow keys. Navigation is limited to the current <code>:::grid</code> container: for example, clicking "16:9 test image one" only opens the other two landscape images in that section.</p>
+<p>Ordinary Markdown images in the same post continue to be handled separately; they are not added to any grid gallery.</p>
+<h2>Checklist</h2>
+<ol>
+<li>Images in each grid have consistent dimensions, with captions below the cards.</li>
+<li>Images scale slightly on hover; after clicking, they can be zoomed, rotated, and navigated with the keyboard.</li>
+<li>Clicking "16:9 test image one" lets the lightbox browse only the other two landscape images in that section.</li>
+<li>Below 768px, grids use at most two columns; below 480px, they use one column.</li>
+<li>Portrait images in "Four Columns with <code>contain</code>" are fully visible with empty space and no cropping.</li>
+<li>Five- and six-column grids retain their specified column count on wide screens, then collapse to two or one column according to the responsive rules.</li>
+</ol>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Examples"/>
+  </entry>
+  <entry>
+    <title>Mermaid Diagram Gallery</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/markdown-mermaid/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/markdown-mermaid/</id>
+    <published>2024-05-02T00:00:00.000Z</published>
+    <updated>2024-05-02T00:00:00.000Z</updated>
+    <summary>A gallery of Mermaid diagrams for processes, interactions, data models, schedules, and project history.</summary>
+    <content type="html"><![CDATA[<p>Mermaid turns text descriptions in Markdown into diagrams. The examples below use Shirone's content workflow to demonstrate diagram types commonly used in technical articles and project notes.</p>
+<h2>Flowchart</h2>
+<p>Flowcharts describe a process, including decisions and paths that return to an earlier step.</p>
+<pre><code>flowchart TD
+    accTitle: Article publishing workflow
+    accDescr: An article moves through writing, validation, preview, and build before publication. Failed validation returns it for revision.
+    Draft[Write Markdown] --&gt; Check{Validation passed?}
+    Check --&gt;|No| Revise[Revise article]
+    Revise --&gt; Check
+    Check --&gt;|Yes| Preview[Preview locally]
+    Preview --&gt; Build[Build static page]
+    Build --&gt; Publish[Publish]
+</code></pre>
+<h2>Sequence Diagram</h2>
+<p>Sequence diagrams present collaboration between participants in chronological order. This example follows a Swup navigation from request to Mermaid rendering.</p>
+<pre><code>sequenceDiagram
+    accTitle: Diagram rendering after in-site navigation
+    accDescr: A reader starts navigation, Swup replaces the article content, and the Mermaid renderer enhances diagrams on the new page.
+    actor Reader
+    participant Browser
+    participant Swup
+    participant Content as Article region
+    participant Renderer as Mermaid renderer
+    Reader-&gt;&gt;Browser: Open another article
+    Browser-&gt;&gt;Swup: Start in-site navigation
+    Swup-&gt;&gt;Content: Replace page content
+    Swup--&gt;&gt;Renderer: Emit content:replace
+    Renderer-&gt;&gt;Content: Find Mermaid containers
+    Renderer--&gt;&gt;Browser: Insert themed SVGs
+</code></pre>
+<h2>Entity Relationship Diagram</h2>
+<p>Entity relationship diagrams model structured data and the connections between authors, posts, tags, and comments.</p>
+<pre><code>erDiagram
+    accTitle: Blog content relationships
+    accDescr: Authors write posts, posts receive comments, and join records connect posts to multiple tags.
+    AUTHOR ||--o{ POST : writes
+    POST ||--o{ COMMENT : receives
+    POST ||--o{ POST_TAG : classified_by
+    TAG ||--o{ POST_TAG : groups
+    AUTHOR {
+        string id PK
+        string display_name
+    }
+    POST {
+        string slug PK
+        string title
+        datetime published_at
+        string author_id FK
+    }
+    COMMENT {
+        string id PK
+        string post_slug FK
+        string body
+    }
+    TAG {
+        string id PK
+        string label
+    }
+    POST_TAG {
+        string post_slug FK
+        string tag_id FK
+    }
+</code></pre>
+<h2>Class Diagram</h2>
+<p>Class diagrams communicate responsibilities, public methods, and dependency directions in a software design.</p>
+<pre><code>classDiagram
+    accTitle: Markdown rendering modules
+    accDescr: The content pipeline uses a Mermaid plugin to create fallback markup, which the client renderer later enhances into an SVG.
+    class ContentPipeline {
+        +render(markdown)
+        +collectMetadata()
+    }
+    class MermaidPlugin {
+        +transform(codeFence)
+        +createFallback()
+    }
+    class DiagramRenderer {
+        +initialize()
+        +renderAll()
+        +refreshTheme()
+    }
+    class ThemeTokens {
+        +primary
+        +surface
+        +outline
+    }
+    ContentPipeline --&gt; MermaidPlugin : uses
+    DiagramRenderer --&gt; MermaidPlugin : enhances output
+    DiagramRenderer --&gt; ThemeTokens : reads
+</code></pre>
+<h2>State Diagram</h2>
+<p>State diagrams show the lifecycle of an object and the events that move it between states.</p>
+<pre><code>stateDiagram-v2
+    accTitle: Article lifecycle
+    accDescr: An article moves from draft to review and publication. It may return for revision or eventually be archived.
+    [*] --&gt; Draft
+    Draft --&gt; InReview : submit
+    InReview --&gt; Draft : request changes
+    InReview --&gt; Published : approve
+    Published --&gt; Draft : retract
+    Published --&gt; Archived : archive
+    Archived --&gt; [*]
+</code></pre>
+<h2>XY Chart</h2>
+<p>XY charts combine bars and lines to compare values and trends over a shared axis.</p>
+<pre><code>xychart-beta
+    accTitle: Six weeks of content performance
+    accDescr: Bars show normalized weekly publishing volume, while the line shows normalized reading completion.
+    title "Six weeks of content performance"
+    x-axis "Week" [1, 2, 3, 4, 5, 6]
+    y-axis "Relative score" 0 --&gt; 100
+    bar [36, 52, 44, 68, 76, 84]
+    line [48, 55, 62, 61, 73, 81]
+</code></pre>
+<h2>Pie Chart</h2>
+<p>Pie charts provide a compact comparison of how categories contribute to a whole.</p>
+<pre><code>pie showData
+    accTitle: Article topics by share
+    accDescr: Engineering accounts for forty percent, design systems for twenty-five percent, and the remainder is split between guides and essays.
+    title Article topics by share
+    "Engineering" : 40
+    "Design systems" : 25
+    "Guides" : 20
+    "Essays" : 15
+</code></pre>
+<h2>Gantt Chart</h2>
+<p>Gantt charts arrange tasks, dependencies, and milestones along a calendar timeline.</p>
+<pre><code>gantt
+    accTitle: Theme release plan
+    accDescr: The release plan moves from requirements and interaction design through component development, testing, and release.
+    title Theme release plan
+    dateFormat YYYY-MM-DD
+    axisFormat %m/%d
+    section Design
+    Confirm requirements :done, brief, 2024-05-06, 2d
+    Refine interactions :done, interaction, after brief, 3d
+    section Implementation
+    Develop components :active, components, after interaction, 6d
+    Write examples :examples, after interaction, 4d
+    section Validation
+    Automated tests :tests, after components, 3d
+    Release :milestone, release, after tests, 0d
+</code></pre>
+<h2>Mind Map</h2>
+<p>Mind maps expand a central topic into related areas and supporting concepts.</p>
+<pre><code>mindmap
+  root((Shirone))
+    Content experience
+      Markdown
+      Search
+      Diagrams
+    Interface system
+      M3E tokens
+      Responsive layout
+      Color schemes
+    Engineering quality
+      Astro Check
+      Playwright
+      Accessibility
+</code></pre>
+<h2>Timeline</h2>
+<p>Timelines summarize significant events or phases without requiring exact calendar durations.</p>
+<pre><code>timeline
+    title Mermaid support evolution
+    Pipeline design : Detect Mermaid fences
+                    : Preserve source fallback
+    Client enhancement : Load the runtime on demand
+                       : Apply theme tokens
+    Reliability : Support Swup navigation
+                : Verify responsive and accessible output
+</code></pre>
+<h2>User Journey</h2>
+<p>User journey diagrams combine actions, participants, and experience scores across the stages of a task.</p>
+<pre><code>journey
+    accTitle: A reader understanding a technical article
+    accDescr: The reader discovers an article, combines prose with diagrams to understand it, and then explores related topics.
+    title A reader understanding a technical article
+    section Discover
+      Browse the article list: 4: Reader
+      Choose a topic: 5: Reader
+    section Understand
+      Read the article: 4: Reader
+      Inspect a relationship diagram: 5: Reader
+    section Continue
+      Open a related article: 4: Reader
+      Bookmark the page: 3: Reader
+</code></pre>
+<h2>Git Graph</h2>
+<p>Git graphs show how work progresses on a feature branch before it merges into the main line.</p>
+<pre><code>gitGraph
+    accTitle: Mermaid feature branch history
+    accDescr: A feature branch adds the renderer and tests before merging into the main branch for release.
+    commit id: "base"
+    branch mermaid
+    checkout mermaid
+    commit id: "add-renderer"
+    commit id: "add-tests"
+    checkout main
+    merge mermaid id: "merge-mermaid"
+    commit id: "release"
+</code></pre>
+<h2>Kanban Board</h2>
+<p>Kanban boards group tasks by workflow state to make current progress easy to scan.</p>
+<pre><code>kanban
+  backlog[Backlog]
+    docs[Write author documentation]
+    examples[Expand example data]
+  active[In progress]
+    themes[Verify theme adaptation]
+  complete[Complete]
+    fallback[Source fallback]
+    rendering[Client rendering]
+</code></pre>
+<h2>Sankey Diagram</h2>
+<p>Sankey diagrams use link width to show how traffic or another quantity flows between nodes.</p>
+<pre><code>sankey-beta
+Landing,Reading,720
+Discovery,Reading,430
+Reading,Explore,360
+Reading,Topics,210
+Reading,Outbound,140
+</code></pre>
+<h2>Line Breaks in Labels</h2>
+<p>HTML labels accept a line break, so a label can wrap without widening the diagram.</p>
+<pre><code>flowchart LR
+  A[First line&lt;br&gt;Second line] --&gt; B[Plain label]
+</code></pre>
+<p>Each example uses a standard <code>mermaid</code> code fence. The server preserves readable source markup, and the browser enhances it into an SVG that follows the active theme. Diagrams render again when the theme changes or when Swup navigates to this article.</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Examples"/>
+  </entry>
+  <entry>
+    <title>Markdown Extended Features</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/markdown-extended/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/markdown-extended/</id>
+    <published>2024-05-01T00:00:00.000Z</published>
+    <updated>2024-11-29T00:00:00.000Z</updated>
+    <summary>Read more about Markdown features in Fuwari</summary>
+    <content type="html"><![CDATA[<h2>GitHub Repository Cards</h2>
+<p>You can add dynamic cards that link to GitHub repositories, on page load, the repository information is pulled from the GitHub API.</p>
+<p>::github{repo="Fabrizz/MMM-OnSpotify"}</p>
+<p>Create a GitHub repository card with the code <code>::github{repo="&lt;owner&gt;/&lt;repo&gt;"}</code>.</p>
+<pre><code>::github{repo="saicaca/fuwari"}
+</code></pre>
+<h2>Mermaid Diagrams</h2>
+<p>Fenced <code>mermaid</code> blocks are rendered as diagrams and follow the active color scheme.</p>
+<pre><code>flowchart LR
+    accTitle: Markdown rendering pipeline
+    accDescr: Markdown source is transformed into semantic HTML and then enhanced as a themed SVG diagram.
+    A[Markdown source] --&gt; B[Astro content pipeline]
+    B --&gt; C[Semantic HTML]
+    C --&gt; D[Themed diagram]
+</code></pre>
+<h2>Admonitions</h2>
+<p>Following types of admonitions are supported: <code>note</code> <code>tip</code> <code>important</code> <code>warning</code> <code>caution</code></p>
+<p>:::note
+Highlights information that users should take into account, even when skimming.
+:::</p>
+<p>:::tip
+Optional information to help a user be more successful.
+:::</p>
+<p>:::important
+Crucial information necessary for users to succeed.
+:::</p>
+<p>:::warning
+Critical content demanding immediate user attention due to potential risks.
+:::</p>
+<p>:::caution
+Negative potential consequences of an action.
+:::</p>
+<h3>Basic Syntax</h3>
+<pre><code>:::note
+Highlights information that users should take into account, even when skimming.
+:::
+
+:::tip
+Optional information to help a user be more successful.
+:::
+</code></pre>
+<h3>Custom Titles</h3>
+<p>The title of the admonition can be customized.</p>
+<p>:::note[MY CUSTOM TITLE]
+This is a note with a custom title.
+:::</p>
+<pre><code>:::note[MY CUSTOM TITLE]
+This is a note with a custom title.
+:::
+</code></pre>
+<h3>GitHub Syntax</h3>
+<blockquote>
+<p>[!TIP]
+<a href="https://github.com/orgs/community/discussions/16925">The GitHub syntax</a> is also supported.</p>
+</blockquote>
+<pre><code>&gt; [!NOTE]
+&gt; The GitHub syntax is also supported.
+
+&gt; [!TIP]
+&gt; The GitHub syntax is also supported.
+</code></pre>
+<h3>Spoiler</h3>
+<p>You can add spoilers to your text. The text also supports <strong>Markdown</strong> syntax.</p>
+<p>The content :spoiler[is hidden <strong>ayyy</strong>]!</p>
+<pre><code>The content :spoiler[is hidden **ayyy**]!
+
+</code></pre>
+<h2>Image Widths and Captions</h2>
+<p>A standalone image accepts an optional <code>w-N%</code> width token in its alt text and a Markdown title rendered as a centered caption below the image:</p>
+<p><img src="/images/albums/AcgExample/07.webp" alt="Album example image w-50%" title="Half-width image with a caption" /></p>
+<pre><code>![Image description w-50%](./image.webp "Visible caption")
+</code></pre>
+<p>Valid widths range from <code>w-1%</code> to <code>w-100%</code>; invalid tokens stay in the alt text. The width and the caption are independent — a title alone also produces a caption:</p>
+<p><img src="/images/albums/AcgExample/08.webp" alt="Album example image w-75%" /></p>
+<p><img src="/images/albums/AcgExample/09.webp" alt="Album example image" title="Caption without a width token" /></p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Guides"/>
+  </entry>
+  <entry>
+    <title>Expressive Code Example</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/expressive-code/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/expressive-code/</id>
+    <published>2024-04-10T00:00:00.000Z</published>
+    <updated>2024-04-10T00:00:00.000Z</updated>
+    <summary>How code blocks look in Markdown using Expressive Code.</summary>
+    <content type="html"><![CDATA[<p>Here, we'll explore how code blocks look using <a href="https://expressive-code.com/">Expressive Code</a>. The provided examples are based on the official documentation, which you can refer to for further details.</p>
+<h2>Expressive Code</h2>
+<h3>Syntax Highlighting</h3>
+<p><a href="https://expressive-code.com/key-features/syntax-highlighting/">Syntax Highlighting</a></p>
+<h4>Regular syntax highlighting</h4>
+<pre><code>console.log('This code is syntax highlighted!')
+</code></pre>
+<h4>Rendering ANSI escape sequences</h4>
+<pre><code>ANSI colors:
+- Regular: [31mRed[0m [32mGreen[0m [33mYellow[0m [34mBlue[0m [35mMagenta[0m [36mCyan[0m
+- Bold:    [1;31mRed[0m [1;32mGreen[0m [1;33mYellow[0m [1;34mBlue[0m [1;35mMagenta[0m [1;36mCyan[0m
+- Dimmed:  [2;31mRed[0m [2;32mGreen[0m [2;33mYellow[0m [2;34mBlue[0m [2;35mMagenta[0m [2;36mCyan[0m
+
+256 colors (showing colors 160-177):
+[38;5;160m160 [38;5;161m161 [38;5;162m162 [38;5;163m163 [38;5;164m164 [38;5;165m165[0m
+[38;5;166m166 [38;5;167m167 [38;5;168m168 [38;5;169m169 [38;5;170m170 [38;5;171m171[0m
+[38;5;172m172 [38;5;173m173 [38;5;174m174 [38;5;175m175 [38;5;176m176 [38;5;177m177[0m
+
+Full RGB colors:
+[38;2;34;139;34mForestGreen - RGB(34, 139, 34)[0m
+
+Text formatting: [1mBold[0m [2mDimmed[0m [3mItalic[0m [4mUnderline[0m
+</code></pre>
+<h3>Editor &amp; Terminal Frames</h3>
+<p><a href="https://expressive-code.com/key-features/frames/">Editor &amp; Terminal Frames</a></p>
+<h4>Code editor frames</h4>
+<pre><code>console.log('Title attribute example')
+</code></pre>
+<hr />
+<pre><code>&lt;!-- src/content/index.html --&gt;
+&lt;div&gt;File name comment example&lt;/div&gt;
+</code></pre>
+<h4>Terminal frames</h4>
+<pre><code>echo "This terminal frame has no title"
+</code></pre>
+<hr />
+<pre><code>Write-Output "This one has a title!"
+</code></pre>
+<h4>Overriding frame types</h4>
+<pre><code>echo "Look ma, no frame!"
+</code></pre>
+<hr />
+<pre><code># Without overriding, this would be a terminal frame
+function Watch-Tail { Get-Content -Tail 20 -Wait $args }
+New-Alias tail Watch-Tail
+</code></pre>
+<h3>Text &amp; Line Markers</h3>
+<p><a href="https://expressive-code.com/key-features/text-markers/">Text &amp; Line Markers</a></p>
+<h4>Marking full lines &amp; line ranges</h4>
+<pre><code>// Line 1 - targeted by line number
+// Line 2
+// Line 3
+// Line 4 - targeted by line number
+// Line 5
+// Line 6
+// Line 7 - targeted by range "7-8"
+// Line 8 - targeted by range "7-8"
+</code></pre>
+<h4>Selecting line marker types (mark, ins, del)</h4>
+<pre><code>function demo() {
+  console.log('this line is marked as deleted')
+  // This line and the next one are marked as inserted
+  console.log('this is the second inserted line')
+
+  return 'this line uses the neutral default marker type'
+}
+</code></pre>
+<h4>Adding labels to line markers</h4>
+<pre><code>// labeled-line-markers.jsx
+&lt;button
+  role="button"
+  {...props}
+  value={value}
+  className={buttonClassName}
+  disabled={disabled}
+  active={active}
+&gt;
+  {children &amp;&amp;
+    !active &amp;&amp;
+    (typeof children === 'string' ? &lt;span&gt;{children}&lt;/span&gt; : children)}
+&lt;/button&gt;
+</code></pre>
+<h4>Adding long labels on their own lines</h4>
+<pre><code>// labeled-line-markers.jsx
+&lt;button
+  role="button"
+  {...props}
+
+  value={value}
+  className={buttonClassName}
+
+  disabled={disabled}
+  active={active}
+&gt;
+
+  {children &amp;&amp;
+    !active &amp;&amp;
+    (typeof children === 'string' ? &lt;span&gt;{children}&lt;/span&gt; : children)}
+&lt;/button&gt;
+</code></pre>
+<h4>Using diff-like syntax</h4>
+<pre><code>+this line will be marked as inserted
+-this line will be marked as deleted
+this is a regular line
+</code></pre>
+<hr />
+<pre><code>--- a/README.md
++++ b/README.md
+@@ -1,3 +1,4 @@
++this is an actual diff file
+-all contents will remain unmodified
+ no whitespace will be removed either
+</code></pre>
+<h4>Combining syntax highlighting with diff-like syntax</h4>
+<pre><code>  function thisIsJavaScript() {
+    // This entire block gets highlighted as JavaScript,
+    // and we can still add diff markers to it!
+-   console.log('Old code to be removed')
++   console.log('New and shiny code!')
+  }
+</code></pre>
+<h4>Marking individual text inside lines</h4>
+<pre><code>function demo() {
+  // Mark any given text inside lines
+  return 'Multiple matches of the given text are supported';
+}
+</code></pre>
+<h4>Regular expressions</h4>
+<pre><code>console.log('The words yes and yep will be marked.')
+</code></pre>
+<h4>Escaping forward slashes</h4>
+<pre><code>echo "Test" &gt; /home/test.txt
+</code></pre>
+<h4>Selecting inline marker types (mark, ins, del)</h4>
+<pre><code>function demo() {
+  console.log('These are inserted and deleted marker types');
+  // The return statement uses the default marker type
+  return true;
+}
+</code></pre>
+<h3>Word Wrap</h3>
+<p><a href="https://expressive-code.com/key-features/word-wrap/">Word Wrap</a></p>
+<h4>Configuring word wrap per block</h4>
+<pre><code>// Example with wrap
+function getLongString() {
+  return 'This is a very long string that will most probably not fit into the available space unless the container is extremely wide'
+}
+</code></pre>
+<hr />
+<pre><code>// Example with wrap=false
+function getLongString() {
+  return 'This is a very long string that will most probably not fit into the available space unless the container is extremely wide'
+}
+</code></pre>
+<h4>Configuring indentation of wrapped lines</h4>
+<pre><code>// Example with preserveIndent (enabled by default)
+function getLongString() {
+  return 'This is a very long string that will most probably not fit into the available space unless the container is extremely wide'
+}
+</code></pre>
+<hr />
+<pre><code>// Example with preserveIndent=false
+function getLongString() {
+  return 'This is a very long string that will most probably not fit into the available space unless the container is extremely wide'
+}
+</code></pre>
+<h2>Collapsible Sections</h2>
+<p><a href="https://expressive-code.com/plugins/collapsible-sections/">Collapsible Sections</a></p>
+<pre><code>// All this boilerplate setup code will be collapsed
+import { someBoilerplateEngine } from '@example/some-boilerplate'
+import { evenMoreBoilerplate } from '@example/even-more-boilerplate'
+
+const engine = someBoilerplateEngine(evenMoreBoilerplate())
+
+// This part of the code will be visible by default
+engine.doSomething(1, 2, 3, calcFn)
+
+function calcFn() {
+  // You can have multiple collapsed sections
+  const a = 1
+  const b = 2
+  const c = a + b
+
+  // This will remain visible
+  console.log(`Calculation result: ${a} + ${b} = ${c}`)
+  return c
+}
+
+// All this code until the end of the block will be collapsed again
+engine.closeConnection()
+engine.freeMemory()
+engine.shutdown({ reason: 'End of example boilerplate code' })
+</code></pre>
+<h2>Line Numbers</h2>
+<p><a href="https://expressive-code.com/plugins/line-numbers/">Line Numbers</a></p>
+<h3>Displaying line numbers per block</h3>
+<pre><code>// This code block will show line numbers
+console.log('Greetings from line 2!')
+console.log('I am on line 3')
+</code></pre>
+<hr />
+<pre><code>// Line numbers are disabled for this block
+console.log('Hello?')
+console.log('Sorry, do you know what line I am on?')
+</code></pre>
+<h3>Changing the starting line number</h3>
+<pre><code>console.log('Greetings from line 5!')
+console.log('I am on line 6')
+</code></pre>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Examples"/>
+  </entry>
+  <entry>
+    <title>Markdown Example</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/markdown/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/markdown/</id>
+    <published>2023-10-01T00:00:00.000Z</published>
+    <updated>2023-10-01T00:00:00.000Z</updated>
+    <summary>A simple example of a Markdown blog post.</summary>
+    <content type="html"><![CDATA[<h1>An h1 header</h1>
+<p>Paragraphs are separated by a blank line.</p>
+<p>2nd paragraph. <em>Italic</em>, <strong>bold</strong>, and <code>monospace</code>. Itemized lists
+look like:</p>
+<ul>
+<li>this one</li>
+<li>that one</li>
+<li>the other one</li>
+</ul>
+<p>Note that --- not considering the asterisk --- the actual text
+content starts at 4-columns in.</p>
+<blockquote>
+<p>Block quotes are
+written like so.</p>
+<p>They can span multiple paragraphs,
+if you like.</p>
+</blockquote>
+<p>Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., "it's all
+in chapters 12--14"). Three dots ... will be converted to an ellipsis.
+Unicode is supported. ☺</p>
+<h2>An h2 header</h2>
+<p>Here's a numbered list:</p>
+<ol>
+<li>first item</li>
+<li>second item</li>
+<li>third item</li>
+</ol>
+<p>Note again how the actual text starts at 4 columns in (4 characters
+from the left side). Here's a code sample:</p>
+<pre><code># Let me re-iterate ...
+for i in 1 .. 10 { do-something(i) }
+</code></pre>
+<p>As you probably guessed, indented 4 spaces. By the way, instead of
+indenting the block, you can use delimited blocks, if you like:</p>
+<pre><code>define foobar() {
+    print "Welcome to flavor country!";
+}
+</code></pre>
+<p>(which makes copying &amp; pasting easier). You can optionally mark the
+delimited block for Pandoc to syntax highlight it:</p>
+<pre><code>import time
+# Quick, count to ten!
+for i in range(10):
+    # (but not *too* quick)
+    time.sleep(0.5)
+    print i
+</code></pre>
+<h3>An h3 header</h3>
+<p>Now a nested list:</p>
+<ol>
+<li>
+<p>First, get these ingredients:</p>
+<ul>
+<li>carrots</li>
+<li>celery</li>
+<li>lentils</li>
+</ul>
+</li>
+<li>
+<p>Boil some water.</p>
+</li>
+<li>
+<p>Dump everything in the pot and follow
+this algorithm:</p>
+<pre><code> find wooden spoon
+ uncover pot
+ stir
+ cover pot
+ balance wooden spoon precariously on pot handle
+ wait 10 minutes
+ goto first step (or shut off burner when done)
+</code></pre>
+<p>Do not bump wooden spoon or it will fall.</p>
+</li>
+</ol>
+<p>Notice again how text always lines up on 4-space indents (including
+that last line which continues item 3 above).</p>
+<p>Here's a link to <a href="http://foo.bar">a website</a>, to a <a href="local-doc.html">local
+doc</a>, and to a <a href="#an-h2-header">section heading in the current
+doc</a>. Here's a footnote [^1].</p>
+<p>[^1]: Footnote text goes here.</p>
+<p>Tables can look like this:</p>
+<p>size material color</p>
+<hr />
+<p>9 leather brown
+10 hemp canvas natural
+11 glass transparent</p>
+<p>Table: Shoes, their sizes, and what they're made of</p>
+<p>(The above is the caption for the table.) Pandoc also supports
+multi-line tables:</p>
+<hr />
+<p>keyword text</p>
+<hr />
+<p>red Sunsets, apples, and
+other red or reddish
+things.</p>
+<p>green Leaves, grass, frogs
+and other things it's
+not easy being.</p>
+<hr />
+<p>A horizontal rule follows.</p>
+<hr />
+<p>Here's a definition list:</p>
+<p>apples
+: Good for making applesauce.
+oranges
+: Citrus!
+tomatoes
+: There's no "e" in tomatoe.</p>
+<p>Again, text is indented 4 spaces. (Put a blank line between each
+term/definition pair to spread things out more.)</p>
+<p>Here's a "line block":</p>
+<p>| Line one
+| Line too
+| Line tree</p>
+<p>and images can be specified like so:</p>
+<p>Inline math equations go in like so: $\omega = d\phi / dt$. Display
+math should get its own line and be put in in double-dollarsigns:</p>
+<p>$$I = \int \rho R^{2} dV$$</p>
+<p>$$
+\begin{equation*}
+\pi
+=3.1415926535
+;8979323846;2643383279;5028841971;6939937510;5820974944
+;5923078164;0628620899;8628034825;3421170679;\ldots
+\end{equation*}
+$$</p>
+<p>And note that you can backslash-escape any punctuation characters
+which you wish to be displayed literally, ex.: `foo`, *bar*, etc.</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Examples"/>
+  </entry>
+  <entry>
+    <title>Include Video in the Posts</title>
+    <link href="https://fanchanghong650-hub.github.io/posts/video/" rel="alternate" type="text/html"/>
+    <id>https://fanchanghong650-hub.github.io/posts/video/</id>
+    <published>2023-08-01T00:00:00.000Z</published>
+    <updated>2023-08-01T00:00:00.000Z</updated>
+    <summary>This post demonstrates how to include embedded video in a blog post.</summary>
+    <content type="html"><![CDATA[<p>Just copy the embed code from YouTube or other platforms, and paste it in the markdown file.</p>
+<pre><code>---
+title: Include Video in the Post
+published: 2023-10-19
+// ...
+---
+
+&lt;iframe width="100%" height="468" src="https://www.youtube.com/embed/5gIf0_xpFPI?si=N1WTorLKL0uwLsU_" title="YouTube video player" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;
+</code></pre>
+<h2>YouTube</h2>
+<p>::youtube{id="5gIf0_xpFPI" title="YouTube video" preload="auto"}</p>
+<h2>Bilibili</h2>
+<p>::bilibili{bvid="BV1fK4y1s7Qf" title="Bilibili video" p=1 preload="auto"}</p>
+<h2>AcFun</h2>
+<p>::acfun{acid="ac48649632" title="AcFun video" preload="auto"}</p>
+<h2>ArtPlayer</h2>
+<p>::artplayer{src="https://www.pexels.com/download/video/38538991/" title="Sintel trailer" preload="auto"}</p>
+]]></content>
+    <author><name>Shirone</name></author>
+    <category term="Examples"/>
+  </entry>
+</feed>
